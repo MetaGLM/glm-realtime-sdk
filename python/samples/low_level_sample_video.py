@@ -204,6 +204,7 @@ async def with_zhipu(audio_file_path: str, image_file_path: str):
             if shutdown_event.is_set():
                 return
                 
+            # 使用消息模型发送会话配置
             session_message = SessionUpdateMessage(
                 session=SessionUpdateParams(
                     input_audio_format="wav",

@@ -110,7 +110,7 @@ python samples/low_level_sample_server_vad.py samples/input/give_me_a_joke.wav
 ## 许可证
 
 本项目采用 [LICENSE.md](LICENSE.md) 中规定的许可证。
-`
+
 ## 更新日志
 
 详见 [CHANGELOG.md](CHANGELOG.md)。

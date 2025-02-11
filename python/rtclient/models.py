@@ -385,7 +385,7 @@ class ResponseFunctionCallOutputItem(ResponseItemBase):
     """函数调用输出项"""
 
     type: Literal["function_call_output"] = "function_call_output"
-    call_id: str
+    call_id: Optional[str] = ""
     output: str
 
 

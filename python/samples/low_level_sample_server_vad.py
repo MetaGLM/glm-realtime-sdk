@@ -103,7 +103,7 @@ async def receive_messages(client: RTLowLevelClient):
                 if message is None:
                     continue
 
-                msg_type = message.type
+                msg_type = message.type if hasattr(message, 'type') else message.get('type')
                 if msg_type is None:
                     print("收到未知类型的消息:", message)
                     continue

@@ -164,7 +164,10 @@ async def receive_messages(client: RTLowLevelClient):
                         print("函数调用参数完成消息")
                         print(f"  Response Id: {message.response_id}")
                         print(f"  Arguments: {message.arguments if message.arguments else 'None'}")
-                    
+                    case "response.audio.done":
+                        print("模型音频完成消息")
+                    case "response.audio_transcript.done":
+                        print("模型音频文本完成消息")
                     case "heartbeat":
                         print("心跳消息")
                     

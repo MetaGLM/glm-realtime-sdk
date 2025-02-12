@@ -159,7 +159,10 @@ async def receive_messages(client: RTLowLevelClient):
                     
                     case "heartbeat":
                         print("心跳消息")
-                    
+                    case "response.audio.done":
+                        print("模型音频完成消息")
+                    case "response.audio_transcript.done":
+                        print("模型音频文本完成消息")
                     case _:
                         print(f"未处理的消息类型: {msg_type}")
                         print(message)

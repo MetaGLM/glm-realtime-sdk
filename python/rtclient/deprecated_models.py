@@ -96,13 +96,6 @@ class ResponseTextDoneMessage(ServerMessageBase):
     text: Optional[str]
 
 
-class ResponseAudioDoneMessage(ServerMessageBase):
-    type: Literal["response.audio.done"] = "response.audio.done"
-    response_id: Optional[str]
-    item_id: Optional[str]
-    output_index: Optional[int]
-    content_index: Optional[int]
-
 
 class ResponseFunctionCallArgumentsDeltaMessage(ServerMessageBase):
     type: Literal["response.function_call_arguments.delta"] = "response.function_call_arguments.delta"
@@ -139,7 +132,6 @@ DeprecatedMessageType = Annotated[
         ResponseContentPartDoneMessage,
         ResponseTextDeltaMessage,
         ResponseTextDoneMessage,
-        ResponseAudioDoneMessage,
         ResponseFunctionCallArgumentsDeltaMessage,
         RateLimitsUpdatedMessage,
     ],

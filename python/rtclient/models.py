@@ -517,6 +517,21 @@ class HeartbeatMessage(ServerMessageBase):
     type: Literal["heartbeat"] = "heartbeat"
 
 
+class ConversationCreatedMessage(ServerMessageBase):
+    """会话创建消息"""
+    type: Literal["conversation.created"] = "conversation.created"
+    conversation: dict
+
+
+class ResponseAudioDoneMessage(ServerMessageBase):
+    """音频响应完成消息"""
+    type: Literal["response.audio.done"] = "response.audio.done"
+    response_id: Optional[str] = None
+    item_id: Optional[str] = None
+    output_index: Optional[int] = None
+    content_index: Optional[int] = None
+
+
 UserMessageType = Annotated[
     Union[
         SessionUpdateMessage,
@@ -547,6 +562,8 @@ ServerMessageType = Annotated[
         ResponseAudioTranscriptDoneMessage,
         ResponseAudioDeltaMessage,
         ResponseFunctionCallArgumentsDoneMessage,
+        ConversationCreatedMessage,
+        ResponseAudioDoneMessage,
     ],
     Field(discriminator="type"),
 ]
@@ -570,6 +587,8 @@ def create_message_from_dict(data: dict) -> ServerMessageType:
                 return InputAudioBufferSpeechStartedMessage(**data)
             case "input_audio_buffer.speech_stopped":
                 return InputAudioBufferSpeechStoppedMessage(**data)
+            case "conversation.created":
+                return ConversationCreatedMessage(**data)
             case "conversation.item.created":
                 return ItemCreatedMessage(**data)
             case "conversation.item.input_audio_transcription.completed":
@@ -584,6 +603,8 @@ def create_message_from_dict(data: dict) -> ServerMessageType:
                 return ResponseAudioTranscriptDoneMessage(**data)
             case "response.audio.delta":
                 return ResponseAudioDeltaMessage(**data)
+            case "response.audio.done":
+                return ResponseAudioDoneMessage(**data)
             case "response.function_call_arguments.done":
                 return ResponseFunctionCallArgumentsDoneMessage(**data)
             case _:

@@ -1,3 +1,4 @@
+最新接口文档参考 https://open.bigmodel.cn/dev/api/rtav/GLM-Realtime
 更新记录
 
 音视频实时 API（通过 `/realtime`）构建在 WebSocket API 之上，以方便最终用户和模型之间进行完全异步的流式通信。

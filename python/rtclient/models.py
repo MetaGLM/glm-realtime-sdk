@@ -386,7 +386,7 @@ class ResponseFunctionCallOutputItem(ResponseItemBase):
 
     type: Literal["function_call_output"] = "function_call_output"
     call_id: Optional[str] = ""
-    output: str
+    output: Optional[str] = None
 
 
 ResponseItem = Annotated[

@@ -1,5 +1,9 @@
 # 智谱 Realtime Python Low Level SDK
 
+## 接口文档 
+
+最新接口文档参考 https://open.bigmodel.cn/dev/api/rtav/GLM-Realtime
+
 ## 项目结构
 ```
 .

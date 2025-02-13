@@ -22,10 +22,6 @@ class ItemDeleteMessage(ClientMessageBase):
     item_id: str
 
 
-class InputAudioBufferClearedMessage(ServerMessageBase):
-    """Signals the server has cleared the audio buffer."""
-    type: Literal["input_audio_buffer.cleared"] = "input_audio_buffer.cleared"
-
 
 class ItemTruncatedMessage(ServerMessageBase):
     type: Literal["conversation.item.truncated"] = "conversation.item.truncated"
@@ -37,15 +33,6 @@ class ItemTruncatedMessage(ServerMessageBase):
 class ItemDeletedMessage(ServerMessageBase):
     type: Literal["conversation.item.deleted"] = "conversation.item.deleted"
     item_id: Optional[str]
-
-
-class ItemInputAudioTranscriptionFailedMessage(ServerMessageBase):
-    type: Literal["conversation.item.input_audio_transcription.failed"] = (
-        "conversation.item.input_audio_transcription.failed"
-    )
-    item_id: Optional[str]
-    content_index: Optional[int]
-    error: Optional[RealtimeError]
 
 
 class ResponseOutputItemAddedMessage(ServerMessageBase):
@@ -96,7 +83,6 @@ class ResponseTextDoneMessage(ServerMessageBase):
     text: Optional[str]
 
 
-
 class ResponseFunctionCallArgumentsDeltaMessage(ServerMessageBase):
     type: Literal["response.function_call_arguments.delta"] = "response.function_call_arguments.delta"
     response_id: Optional[str]
@@ -122,10 +108,8 @@ DeprecatedMessageType = Annotated[
     Union[
         ItemTruncateMessage,
         ItemDeleteMessage,
-        InputAudioBufferClearedMessage,
         ItemTruncatedMessage,
         ItemDeletedMessage,
-        ItemInputAudioTranscriptionFailedMessage,
         ResponseOutputItemAddedMessage,
         ResponseOutputItemDoneMessage,
         ResponseContentPartAddedMessage,

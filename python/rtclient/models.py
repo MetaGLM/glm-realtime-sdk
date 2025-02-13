@@ -532,6 +532,20 @@ class ResponseAudioDoneMessage(ServerMessageBase):
     content_index: Optional[int] = None
 
 
+class InputAudioBufferClearedMessage(ServerMessageBase):
+    """Signals the server has cleared the audio buffer."""
+    type: Literal["input_audio_buffer.cleared"] = "input_audio_buffer.cleared"
+
+
+class ItemInputAudioTranscriptionFailedMessage(ServerMessageBase):
+    type: Literal["conversation.item.input_audio_transcription.failed"] = (
+        "conversation.item.input_audio_transcription.failed"
+    )
+    item_id: Optional[str] = None
+    content_index: Optional[int] = None
+    error: Optional[RealtimeError] = None
+
+
 UserMessageType = Annotated[
     Union[
         SessionUpdateMessage,
@@ -554,8 +568,10 @@ ServerMessageType = Annotated[
         InputAudioBufferCommittedMessage,
         InputAudioBufferSpeechStartedMessage,
         InputAudioBufferSpeechStoppedMessage,
+        InputAudioBufferClearedMessage,
         ItemCreatedMessage,
         ItemInputAudioTranscriptionCompletedMessage,
+        ItemInputAudioTranscriptionFailedMessage,
         ResponseCreatedMessage,
         ResponseDoneMessage,
         ResponseAudioTranscriptDeltaMessage,
@@ -587,12 +603,16 @@ def create_message_from_dict(data: dict) -> ServerMessageType:
                 return InputAudioBufferSpeechStartedMessage(**data)
             case "input_audio_buffer.speech_stopped":
                 return InputAudioBufferSpeechStoppedMessage(**data)
+            case "input_audio_buffer.cleared":
+                return InputAudioBufferClearedMessage(**data)
             case "conversation.created":
                 return ConversationCreatedMessage(**data)
             case "conversation.item.created":
                 return ItemCreatedMessage(**data)
             case "conversation.item.input_audio_transcription.completed":
                 return ItemInputAudioTranscriptionCompletedMessage(**data)
+            case "conversation.item.input_audio_transcription.failed":
+                return ItemInputAudioTranscriptionFailedMessage(**data)
             case "response.created":
                 return ResponseCreatedMessage(**data)
             case "response.done":

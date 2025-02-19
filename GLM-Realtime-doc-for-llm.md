@@ -239,6 +239,7 @@ Realtime API支持两种VAD检测方式：Server VAD模式模型智能检测，�
 | **`RealtimeClientEventInputAudioBufferAppend`**           | 上传音频                       |
 | **`RealtimeClientEventInputAudioBufferAppendVideoFrame`** | 视频通话模式时，上报视频帧              |
 | **`RealtimeClientEventInputAudioBufferCommit`**           | 提交音频                       |
+| **`RealtimeClientEventInputAudioBufferClear`**           | 清除缓冲区中的音频                       |
 | **`RealtimeClientEventConversationItemCreate`**           | 用于文本输入以及上传function call的结果 |
 | **`RealtimeClientEventResponseCreate`**                   | 创建模型调用，推理回复                |
 | **`RealtimeClientEventResponseCancel`**                   | 取消模型调用                     |
@@ -460,6 +461,8 @@ Realtime API支持两种VAD检测方式：Server VAD模式模型智能检测，�
 | `RealtimeServerEventResponseAudioTranscriptDelta`                      | 更新模型生成的音频输出文本时的服务器事件。                                  |
 | `RealtimeServerEventResponseCreated`                                   | 创建新的响应时的服务器事件。                                         |
 | `RealtimeServerEventResponseDone`                                      | 响应完成流式处理时的服务器事件。意味着结束回复                                |
+| `RealtimeServerEventResponseAudioDone`                                | 模型生成的音频完成流式处理时的服务器事件。                                 |
+| `RealtimeServerEventResponseAudioTranscriptDone`                      | 模型生成的音频输出文本完成流式处理时的服务器事件。                                 |
 | `RealtimeServerEventResponseFunctionCallArgumentsDone`                 | 模型生成的函数调用参数完成流式处理时的服务器事件。如果有多个functioncall结果可能会返回多个调用。 |
 | `RealtimeServerEventHeartbeat`                                         | 心跳保活的服务器事件。                                            |
 | `RealtimeServerEventResponseFunctionCallSimpleBrowser`                 | 视频链路触发了内置搜索的服务器事件。                                     |
@@ -752,12 +755,12 @@ Realtime API支持两种VAD检测方式：Server VAD模式模型智能检测，�
 | item_id       | string  | 项的 ID。                                    |
 | output_index  | integer | 响应中的输出项的索引。                               |
 | content_index | integer | 项内容数组中的内容部分的索引。                           |
-| transcript     | string  | 音频的最终文本。                                  |
 
 * 示例
 
 ```json
-{
+{  
+  "event_id": "<event_id>",
   "type": "response.audio.done",
   "response_id": "<response_id>",
   "item_id": "<item_id>",
@@ -899,23 +902,6 @@ Realtime API支持两种VAD检测方式：Server VAD模式模型智能检测，�
 }
 ```
 
-```python
-{
-  "usage": {
-    "total_tokens": 150,
-    "input_tokens": 50,
-    "output_tokens": 100,
-    "input_token_details": {
-      "text_tokens": 30,
-      "audio_tokens": 20
-    },
-    "output_token_details": {
-      "text_tokens": 80,
-      "audio_tokens": 20
-    }
-  }
-}
-```
 
 ### RealtimeServerEventResponseFunctionCallArgumentsDone
 

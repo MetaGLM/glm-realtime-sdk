@@ -139,6 +139,8 @@ async def receive_messages(client: RTLowLevelClient):
                                 "status": "success",
                                 "message": f"成功拨打电话给 {args.get('contact_name', '未知姓名')}"
                             }
+                            # 等待1秒
+                            await asyncio.sleep(1)
                             
                             # 创建函数调用输出项
                             output_item = FunctionCallOutputItem(

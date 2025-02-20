@@ -101,7 +101,7 @@ async def receive_messages(client: RTLowLevelClient):
                 break
                 
             try:
-                message = await asyncio.wait_for(client.recv(), timeout=1.0)
+                message = await asyncio.wait_for(client.recv(), timeout=5.0)
                 if message is None:
                     continue
 

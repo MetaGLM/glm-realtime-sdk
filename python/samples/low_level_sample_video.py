@@ -84,6 +84,9 @@ async def send_media(client: RTLowLevelClient, audio_file_path: str, image_file_
     commit_message = InputAudioBufferCommitMessage(client_timestamp=int(time.time() * 1000))
     await client.send(commit_message)
 
+    # 发送创建响应的消息
+    await client.send_json({"type": "response.create"})
+
 
 def get_env_var(var_name: str) -> str:
     value = os.environ.get(var_name)

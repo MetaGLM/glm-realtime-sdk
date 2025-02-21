@@ -142,6 +142,8 @@ async def with_zhipu(audio_file_path: str):
                     client_timestamp=int(asyncio.get_event_loop().time() * 1000)
                 )
                 await client.send(commit_message)
+                # 发送创建响应的消息
+                await client.send_json({"type": "response.create"})
 
             # 创建发送和接收任务
             send_task = asyncio.create_task(send_audio_with_commit())

@@ -79,7 +79,6 @@ class MessageHandler:
                 print("音频缓冲区提交消息")
                 if hasattr(message, "item_id"):
                     print(f"  Item Id: {message.item_id}")
-                await self.client.send_json({"type": "response.create"})
             case "input_audio_buffer.speech_started":
                 print("语音开始消息")
             case "input_audio_buffer.speech_stopped":

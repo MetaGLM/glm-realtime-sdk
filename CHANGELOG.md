@@ -2,8 +2,12 @@
 
 ## 2025-01-23
 
-A python sdk for ZHIPU Realtime API.
+SDKs for ZHIPU Realtime API.
 
 ### 1.0.0
 
 Initial release.
+
+### 1.0.1
+
+Golang SDK

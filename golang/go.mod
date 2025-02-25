@@ -1,4 +1,4 @@
-module github.com/MetaGLM/glm-realtime-sdk/golang/realtime-client
+module github.com/MetaGLM/glm-realtime-sdk/golang
 
 go 1.22.3
 

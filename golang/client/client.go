@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MetaGLM/glm-realtime-sdk/golang/realtime-client/events"
+	"github.com/MetaGLM/glm-realtime-sdk/golang/events"
 	"github.com/gorilla/websocket"
 )
 

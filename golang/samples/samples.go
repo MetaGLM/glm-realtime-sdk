@@ -12,9 +12,9 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/MetaGLM/glm-realtime-sdk/golang/realtime-client/client"
-	"github.com/MetaGLM/glm-realtime-sdk/golang/realtime-client/events"
-	"github.com/MetaGLM/glm-realtime-sdk/golang/realtime-client/tools"
+	"github.com/MetaGLM/glm-realtime-sdk/golang/client"
+	"github.com/MetaGLM/glm-realtime-sdk/golang/events"
+	"github.com/MetaGLM/glm-realtime-sdk/golang/tools"
 )
 
 var (

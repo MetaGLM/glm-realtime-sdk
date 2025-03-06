@@ -1,0 +1,51 @@
+{
+  "name": "ai-search",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "prettier": "prettier --write 'src/**/*.{ts,tsx,less}'"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@ant-design/x": "^1.0.4",
+    "@monaco-editor/react": "^4.6.0",
+    "@ricky0123/vad-web": "^0.0.21",
+    "@wavesurfer/react": "^1.0.7",
+    "ahooks": "^3.8.0",
+    "antd": "^5.22.3",
+    "axios": "^1.7.2",
+    "classnames": "^2.5.1",
+    "copy-to-clipboard": "^3.3.3",
+    "onnxruntime-web": "^1.19.2",
+    "pcm-player": "^0.0.18",
+    "pica": "^9.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "uuid": "^10.0.0",
+    "wavesurfer.js": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/pica": "^9.0.4",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "less": "^4.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-static-copy": "^1.0.6"
+  }
+}

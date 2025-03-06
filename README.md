@@ -12,13 +12,15 @@
 ├── LICENSE.md                  # 许可证文件
 ├── README.md                   # 项目说明文档
 ├── golang/                     # Golang SDK 目录
-└── python/                     # Python SDK 目录
+├── python/                     # Python SDK 目录
+└── frontend/                   # 前端demo + SDK 目录
 ```
 
 ## 快速开始
 
  - Python SDK: [README.md](python/README.md)
  - Golang SDK: [README.md](golang/README.md)
+ - TypeScript SDK: [README.md](frontend/README.md)
 
 ## 许可证
 

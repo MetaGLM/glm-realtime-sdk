@@ -1,0 +1,8 @@
+@default-bg-color: rgba(255, 255, 255, 0.3);
+.frosted-glass(@bg-color: @default-bg-color) {
+  background: @bg-color;
+  //box-shadow: 0 8px 32px 0 rgba(143, 143, 143, 0.37);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}

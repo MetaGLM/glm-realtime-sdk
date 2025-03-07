@@ -1,0 +1,54 @@
+@import "@/styles/scrollBar";
+.galleryContainer {
+  width: 100%;
+  margin: auto;
+}
+
+.mainImageContainer {
+  width: 100%;
+  position: relative;
+}
+
+.mainImage {
+  width: 100%;
+  height: auto;
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  z-index: 1;
+}
+
+.navButton:focus {
+  outline: none;
+}
+
+.navButton:first-child {
+  left: 8px;
+}
+
+.navButton:last-child {
+  right: 8px;
+}
+
+.thumbnailContainer {
+  display: flex;
+  overflow-x: scroll;
+  .scrollBar();
+  width: 100%;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 75px;
+  object-fit: cover;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.thumbnail.active {
+  border: 2px solid var(--ant-color-primary);
+}

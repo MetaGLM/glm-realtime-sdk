@@ -1,0 +1,15 @@
+.scrollBar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  scrollbar-gutter: stable;
+  &::-webkit-scrollbar {
+    width: 4px;
+    background-color: rgba(0, 0, 0, 0.01);
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+}

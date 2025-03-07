@@ -1,0 +1,22 @@
+@import "@/styles/scrollBar";
+
+.history {
+  overflow-y: scroll;
+  .scrollBar();
+  .client {
+    color: var(--ant-green);
+  }
+  .server {
+    color: var(--ant-geekblue)
+  }
+  .eventName {
+    font-size: 12px;
+    font-weight: 550;
+  }
+  pre {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}

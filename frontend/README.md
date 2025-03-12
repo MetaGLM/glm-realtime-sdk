@@ -118,7 +118,7 @@ realtime.start();
 | 属性名       | 类型      | 描述       |
 | ------------ | --------- | ---------- |
 | tools        | Array     | 工具列表   |
-| systemPrompt | string    | 系统提示词 |
+| instructions | string    | 系统提示词 |
 | voice        | string    | 音色       |
 | tts_source   | TTSSource | TTS来源    |
 

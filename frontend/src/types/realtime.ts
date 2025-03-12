@@ -30,18 +30,34 @@ export enum RealtimeServerEvent {
   ResponseDone = 'response.done', // 最后一包，回复结束
   Error = 'error',
 }
-// 客户端，需要用到的字段，每次发全量
-export type SessionUpdateData = {
+
+export type SessionConfig = {
+  id: string;
+  // 内部字段，这些不是openai的原生字段
   beta_fields: {
-    chat_mode: ChatMode;
-    tts_source?: TTSSource;
+    chat_mode: ChatMode; // 音视频模式
+    image_size_x?: number; // 截图尺寸
+    image_size_y?: number;
+    fps?: number; // 截图发送频率
+    tts_source?: TTSSource; // tts来源
   };
-  turn_detection: null | { type: string };
   instructions: string; // system prompt
-  output_audio_format?: 'pcm' | 'mp3';
-  tools: object[] | null;
-  voice: string;
+  // vad 类型
+  turn_detection: {
+    type: 'server_vad';
+  } | null;
+  tools: object[] | null; // function call tools
+  input_audio_format: 'pcm' | 'wav' | string; // 输入音频格式，pcm16，pcm24表示采样率
+  output_audio_format: 'pcm' | 'mp3'; // 输出tts音频格式
+  voice: string; // 音色
 };
+
+// 客户端，需要用到的字段，每次发全量
+export type SessionUpdateData = Partial<{
+  [K in keyof SessionConfig]: SessionConfig[K] extends object
+    ? Partial<SessionConfig[K]>
+    : SessionConfig[K];
+}>;
 // 事件数据类型定义
 export type RealtimeEventData =
   | RealtimeServerEventData

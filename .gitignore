@@ -4,6 +4,7 @@
 # Env files
 .env
 .idea/
+.vscode/
 
 # Output files
 *.Output

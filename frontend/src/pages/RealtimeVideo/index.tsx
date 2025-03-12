@@ -90,6 +90,7 @@ const RealtimeVideo: React.FC = () => {
   const [formChanged, setFormChanged] = useState(false);
   const realtimeTools = useWatch('tools', form);
   const wsURL = useWatch('wsURL', form);
+  const instructions = useWatch('instructions', form);
   const audioFormat = useWatch('audioFormat', form);
   const voice = useWatch('voice', form);
   const ttsSource = useWatch('tts_source', form);
@@ -125,6 +126,7 @@ const RealtimeVideo: React.FC = () => {
       tools: realtimeTools,
       voice,
       tts_source: ttsSource,
+      instructions,
     },
     ttsFormat: audioFormat,
     inputMode,
@@ -433,8 +435,8 @@ const RealtimeVideo: React.FC = () => {
                 setFormChanged(true);
                 chatInstance.current
                   ?.setTTSFormat(values.audioFormat)
+                  .setInstructions(values.instructions)
                   .setTTSVoice(values.voice)
-                  .setInstructions(values.systemPrompt)
                   .setToolsConfig(values.tools)
                   .setTTSVoiceSource(values.tts_source);
               }
@@ -443,6 +445,11 @@ const RealtimeVideo: React.FC = () => {
             <Form.Item label="调试地址：" name="wsURL">
               <Input allowClear />
             </Form.Item>
+            {chatMode === 'audio' ? (
+              <Form.Item label="系统提示词：" name="instructions">
+                <Input.TextArea allowClear rows={3} />
+              </Form.Item>
+            ) : null}
             <Form.Item label="音频格式：" name="audioFormat">
               <Select
                 options={[
@@ -465,17 +472,7 @@ const RealtimeVideo: React.FC = () => {
             </Form.Item>
             <Form.Item
               hidden={chatMode === 'video_passive'}
-              label={
-                <div>
-                  <span>Tools </span>
-                  <a
-                    href="https://zhipu-ai.feishu.cn/wiki/BQenwb9RRiyHsMkscN9cieSLngd#share-OxAZdnwj6o3Mefx7lzPc8uahnzB"
-                    target="_blank"
-                  >
-                    体验物料参考
-                  </a>
-                </div>
-              }
+              label="Tools："
               name="tools"
             >
               <Editor
@@ -483,7 +480,7 @@ const RealtimeVideo: React.FC = () => {
                 height={300}
                 defaultLanguage="json"
                 options={{
-                  placeholder: '格式参考物料文档',
+                  placeholder: '[...tools]',
                   lineDecorationsWidth: 0,
                   tabSize: 2,
                   formatOnPaste: true,

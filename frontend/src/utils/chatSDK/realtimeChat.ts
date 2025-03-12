@@ -83,7 +83,7 @@ export interface RealtimeOptions extends ChatBaseOptions {
   useHistory?: boolean;
   sessionConfig?: {
     tools?: string; // setter
-    systemPrompt?: string;
+    instructions?: string;
     voice?: string;
     tts_source?: TTSSource;
   };
@@ -248,7 +248,7 @@ export default class RealtimeChat extends ChatBase {
     this.inputMode = options.inputMode ?? 'manual';
     this.chatMode = options.chatMode ?? 'audio';
     this.toolsConfig = options.sessionConfig?.tools ?? '';
-    this.instructions = options.sessionConfig?.systemPrompt ?? '';
+    this.instructions = options.sessionConfig?.instructions ?? '';
     this.voice = options.sessionConfig?.voice ?? 'default';
     this.ttsSource = options.sessionConfig?.tts_source ?? 'e2e';
     this.ttsFormat = options.ttsFormat ?? 'pcm';
@@ -669,7 +669,7 @@ export default class RealtimeChat extends ChatBase {
   // 每次都计算出完整的session配置
   private getSessionConfig = () => {
     const localVAD = null;
-    const serverVAD = { type: 'server_vad' };
+    const serverVAD = { type: 'server_vad' } as const;
     let tools = null;
 
     // 目前仅audio支持自定义tools
@@ -755,10 +755,10 @@ export default class RealtimeChat extends ChatBase {
     this.options.onMessage?.(type, [...this.messageData]);
   };
 
-  // * systemPrompt，手动更新
+  // * instructions，手动更新
   private instructions = '';
-  setInstructions = (instructions: string) => {
-    this.instructions = instructions;
+  setInstructions = (content: string) => {
+    this.instructions = content;
     return this;
   };
 

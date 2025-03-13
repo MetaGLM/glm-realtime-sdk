@@ -84,26 +84,7 @@ export interface SessionCreated extends RealtimeServerEventData {
 
 export interface SessionUpdated extends RealtimeServerEventData {
   type: RealtimeServerEvent.SessionUpdated;
-  session: {
-    beta_fields: {
-      chat_mode: ChatMode;
-      image_size_x?: number;
-      image_size_y?: number;
-      fps?: number;
-      tts_source?: TTSSource;
-    };
-    instructions: string; // system prompt
-    turn_detection: {
-      type: 'server_vad' | null;
-    };
-    tools: object[] | null;
-    tts_config?: {
-      tts_source: TTSSource;
-      timbre: string;
-    } | null;
-    output_audio_format: 'pcm' | 'mp3';
-    voice: string;
-  };
+  session: SessionConfig;
 }
 
 export interface InputAudioBufferSpeechStarted extends RealtimeServerEventData {

@@ -83,6 +83,7 @@ const initValues = {
   audioFormat: 'pcm',
   voice: 'default',
   tts_source: 'e2e',
+  inputAudioFormat: 'wav',
 };
 
 const RealtimeVideo: React.FC = () => {
@@ -94,6 +95,7 @@ const RealtimeVideo: React.FC = () => {
   const audioFormat = useWatch('audioFormat', form);
   const voice = useWatch('voice', form);
   const ttsSource = useWatch('tts_source', form);
+  const inputAudioFormat = useWatch('inputAudioFormat', form);
   const videoElement = useRef<HTMLVideoElement>(null);
   const audioElement = useRef<HTMLAudioElement>(null);
   const chatPanel = useRef<HTMLDivElement>(null);
@@ -127,6 +129,7 @@ const RealtimeVideo: React.FC = () => {
       voice,
       tts_source: ttsSource,
       instructions,
+      input_audio_format: inputAudioFormat,
     },
     ttsFormat: audioFormat,
     inputMode,
@@ -435,6 +438,7 @@ const RealtimeVideo: React.FC = () => {
                 setFormChanged(true);
                 chatInstance.current
                   ?.setTTSFormat(values.audioFormat)
+                  .setInputAudioFormat(values.inputAudioFormat)
                   .setInstructions(values.instructions)
                   .setTTSVoice(values.voice)
                   .setToolsConfig(values.tools)
@@ -450,7 +454,15 @@ const RealtimeVideo: React.FC = () => {
                 <Input.TextArea allowClear rows={3} />
               </Form.Item>
             ) : null}
-            <Form.Item label="音频格式：" name="audioFormat">
+            <Form.Item label="输入音频格式：" name="inputAudioFormat">
+              <Select
+                options={[
+                  { label: 'wav', value: 'wav' },
+                  { label: 'pcm', value: 'pcm' },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item label="输出音频格式：" name="audioFormat">
               <Select
                 options={[
                   { label: 'pcm', value: 'pcm' },

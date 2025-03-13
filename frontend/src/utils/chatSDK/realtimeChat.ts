@@ -17,7 +17,7 @@ import {
 	RealtimeClientEvent,
 	RealtimeClientEventStruct,
 	RealtimeError,
-	RealtimeEventStruct,
+	RealtimeEventStruct, RealtimeHistoryItem,
 	RealtimeServerEvent,
 	RealtimeServerEventStruct,
 	ResponseAudioDelta,
@@ -1136,12 +1136,13 @@ export default class RealtimeChat extends ChatBase {
 
 	// * 消息日志
 	private useHistory = false; // 开关
-	private history: RealtimeEventStruct[] = [];
+	private history: RealtimeHistoryItem[] = [];
 	private appendHistory = (data: RealtimeEventStruct) => {
 		if (!this.useHistory) return;
 		if (!data.event_id) {
 			data.event_id = v4();
 		}
+		const last = this.history.at(-1);
 		switch (data.type) {
 			case RealtimeServerEvent.SessionCreated:
 			case RealtimeServerEvent.SessionUpdated:
@@ -1153,91 +1154,96 @@ export default class RealtimeChat extends ChatBase {
 			case RealtimeServerEvent.ResponseFunctionCallArgumentsDone:
 			case RealtimeServerEvent.ResponseDone:
 			case RealtimeServerEvent.Error:
+			case RealtimeServerEvent.ConversationItemInputAudioTranscriptionCompleted:
+				this.history.push({ data, role: 'model' });
+				break;
 			case RealtimeClientEvent.InputAudioBufferPreCommit:
 			case RealtimeClientEvent.InputAudioBufferCommit:
 			case RealtimeClientEvent.ResponseCancel:
 			case RealtimeClientEvent.ResponseCreate:
 			case RealtimeClientEvent.ConversationItemCreate:
-			case RealtimeServerEvent.ConversationItemInputAudioTranscriptionCompleted:
-				this.history.push(data);
+			case RealtimeClientEvent.SessionUpdate:
+				this.history.push({ data, role: 'user' });
 				break;
 			// 以下的事件通常是大量连续的，所以尽量做合并处理
 			case RealtimeServerEvent.ResponseAudioTranscriptDelta:
-				if (this.history[this.history.length - 1]?.type === data.type) {
-					this.history[this.history.length - 1] = {
+				if (last?.data.type === data.type) {
+					last.data = {
 						...data,
 						delta:
-							(
-								this.history[
-								this.history.length - 1
-									] as ResponseAudioTranscriptDelta
-							).delta +
+							(last.data as ResponseAudioTranscriptDelta).delta +
 							', ' +
 							`【Length: ${data.delta.length}】`,
 					};
 				} else {
 					this.history.push({
-						...data,
-						delta: `【Length: ${data.delta.length}】`,
+						data: {
+							...data,
+							delta: `【Length: ${data.delta.length}】`,
+						},
+						role: 'model',
 					});
 				}
 				break;
 			case RealtimeServerEvent.ResponseAudioDelta:
-				if (this.history[this.history.length - 1]?.type === data.type) {
-					this.history[this.history.length - 1] = {
+				if (last?.data.type === data.type) {
+					last.data = {
 						...data,
 						delta:
-							(this.history[this.history.length - 1] as ResponseAudioDelta)
-								.delta +
+							last.data.delta +
 							', ' +
 							`【${getBinarySizeFromString(data.delta)} KB】`,
 					};
 				} else {
 					this.history.push({
-						...data,
-						delta: `【${getBinarySizeFromString(data.delta)} KB】`,
+						data: {
+							...data,
+							delta: `【${getBinarySizeFromString(data.delta)} KB】`,
+						},
+						role: 'model',
 					});
 				}
 				break;
 			case RealtimeClientEvent.InputAudioBufferAppend:
-				if (this.history[this.history.length - 1]?.type === data.type) {
-					this.history[this.history.length - 1] = {
+				if (last?.data.type === data.type) {
+					last.data = {
 						...data,
 						audio:
-							(this.history[this.history.length - 1] as InputAudioBufferAppend)
-								.audio +
+							(last.data as InputAudioBufferAppend).audio +
 							', ' +
 							`【${getBinarySizeFromString(data.audio)} KB】`,
 					};
 				} else {
 					this.history.push({
-						...data,
-						audio: `【${getBinarySizeFromString(data.audio)} KB】`,
+						data: {
+							...data,
+							audio: `【${getBinarySizeFromString(data.audio)} KB】`,
+						},
+						role: 'user',
 					});
 				}
 				break;
 			case RealtimeClientEvent.InputAudioBufferAppendVideoFrame:
-				if (this.history[this.history.length - 1]?.type === data.type) {
-					this.history[this.history.length - 1] = {
+				if (last?.data.type === data.type) {
+					last.data = {
 						...data,
 						video_frame:
-							(
-								this.history[
-								this.history.length - 1
-									] as InputAudioBufferAppendVideoFrame
-							).video_frame +
+							(last.data as InputAudioBufferAppendVideoFrame).video_frame +
 							', ' +
 							`【${getBinarySizeFromString(data.video_frame)} KB】`,
 					};
 				} else {
 					this.history.push({
-						...data,
-						video_frame: `【${getBinarySizeFromString(data.video_frame)} KB】`,
+						data: {
+							...data,
+							video_frame: `【${getBinarySizeFromString(data.video_frame)} KB】`,
+						},
+						role: 'user',
 					});
 				}
 				break;
 			default:
-				this.history.push(data);
+				this.history.push({ data, role: 'model' });
 				return;
 		}
 		this.options.onHistory?.([...this.history]);

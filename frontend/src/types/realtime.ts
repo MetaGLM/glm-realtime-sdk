@@ -288,3 +288,8 @@ export type ResponseMessageData = {
 };
 
 export type LogType = 'info' | 'error' | 'warning' | 'success';
+
+export type RealtimeHistoryItem = {
+  data: RealtimeEventStruct;
+  role: 'model' | 'user';
+};

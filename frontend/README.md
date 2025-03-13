@@ -115,12 +115,13 @@ realtime.start();
 
 #### SessionConfig
 
-| 属性名       | 类型      | 描述       |
-| ------------ | --------- | ---------- |
-| tools        | Array     | 工具列表   |
-| instructions | string    | 系统提示词 |
-| voice        | string    | 音色       |
-| tts_source   | TTSSource | TTS来源    |
+| 属性名                | 类型             | 描述                                |
+|--------------------|----------------|-----------------------------------|
+| tools              | Array          | 工具列表                              |
+| instructions       | string         | 系统提示词                             |
+| voice              | string         | 音色                                |
+| tts_source         | TTSSource      | TTS来源                             |
+| input_audio_format | 'wav' \| 'pcm' | pcm后可追加采样率比如\"pcm16\"表示16khz，默认16 |
 
 #### VADOptions
 
@@ -152,20 +153,21 @@ realtime.start();
 
 ### 方法(public)
 
-| 方法名              | 参数                                                                             | 描述                                                                                                                                               |
-| ------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| start               | () => Promise<void>                                                              | 实例创建后调用，依次初始化用户音频流，本地VAD，流式播放器，建立ws连接，连接打开后结束                                                              |
-| destroy             | () => void                                                                       | 关闭或销毁所有功能模块，消息历史等保留                                                                                                             |
-| updateSessionConfig | () => void                                                                       | 更新会话配置，会从实例各属性中收集相关字段，每次更新都会上报完整的集合（你用到的部分）                                                             |
-| setInstructions     | (instructions: string) => this                                                   | 设置SystemPrompt，不主动更新sessionConfig                                                                                                          |
-| setToolsConfig      | (tools: string) => this                                                          | 设置自定义的function call tools，方法自行转换，最外层要求是个数组，不主动更新sessionConfig                                                         |
-| setTTSVoice         | (voice: string) => void                                                          | 切换音色                                                                                                                                           |
-| setTTSSource        | (source: TTSSource) => this                                                      | 切换tts来源，下次response生效                                                                                                                      |
-| setInputMode        | (mode: 'manual' \| 'localVAD' \|'serverVAD' ) => void                            | 切换输入模式，先卸载当前模式，再装载新的模式，对于本地模式与远程模式之间的转换，需要等到session.updated之后再装载，期间无法输入                    |
-| manualTalk          | () => void                                                                       | 手动发言开始，结束前会不停发送音频，无VAD检测                                                                                                      |
-| releaseManualTalk   | () => void                                                                       | 释放手动发言，会执行speechEnd的行为                                                                                                                |
+| 方法名                 | 参数                                                                               | 描述                                                                                                 |
+|---------------------|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| start               | () => Promise<void>                                                              | 实例创建后调用，依次初始化用户音频流，本地VAD，流式播放器，建立ws连接，连接打开后结束                                                      |
+| destroy             | () => void                                                                       | 关闭或销毁所有功能模块，消息历史等保留                                                                                |
+| updateSessionConfig | () => void                                                                       | 更新会话配置，会从实例各属性中收集相关字段，每次更新都会上报完整的集合（你用到的部分）                                                        |
+| setInstructions     | (instructions: string) => this                                                   | 设置SystemPrompt，不主动更新sessionConfig                                                                  |
+| setToolsConfig      | (tools: string) => this                                                          | 设置自定义的function call tools，方法自行转换，最外层要求是个数组，不主动更新sessionConfig                                      |
+| setTTSVoice         | (voice: string) => void                                                          | 切换音色                                                                                               |
+| setTTSSource        | (source: TTSSource) => this                                                      | 切换tts来源，下次response生效                                                                               |
+| setInputMode        | (mode: 'manual' \| 'localVAD' \|'serverVAD' ) => void                            | 切换输入模式，先卸载当前模式，再装载新的模式，对于本地模式与远程模式之间的转换，需要等到session.updated之后再装载，期间无法输入                            |
+| manualTalk          | () => void                                                                       | 手动发言开始，结束前会不停发送音频，无VAD检测                                                                           |
+| releaseManualTalk   | () => void                                                                       | 释放手动发言，会执行speechEnd的行为                                                                             |
+| setInputAudioFormat | (format?: 'wav' \| 'pcm' \| string) => void                                      | 输入音频格式，默认wav，pcm后可追加采样率，比如\"pcm16\"表示16khz，默认16khz                                                        |
 | setTTSFormat        | (format: 'mp3' \| 'pcm') => void                                                 | 切换tts音频格式，被动更新，在session.updated之后注册任务到下一次input_audio_buffer.committed再正式切换播放器，因为模型可能连续发消息(主动发言或fc) |
-| appendEventTask     | (eventType: RealtimeServerEvent, eventTask: () => Promise<void> \| void) => void | 在realtime的事件循环中注册任务                                                                                                                     |
+| appendEventTask     | (eventType: RealtimeServerEvent, eventTask: () => Promise<void> \| void) => void | 在realtime的事件循环中注册任务                                                                                |
 
 ### 客户端事件
 
@@ -310,4 +312,7 @@ realtime.start();
 
 - 报错信息为Failed to load module script: Expected a JavaScript module script but the server responded with MIME type of
   application/octet-stream；Encountered an error while loading model file /sillero_vad_legacy.onnx
-- 需要将.mjs文件的Content-Type配置为text/javascript或application/javascript
+- 需要调整部署网页的服务器配置，将.mjs文件的Content-Type配置为text/javascript或application/javascript
+
+### TODO：
+- 添加一个移动端demo

@@ -338,3 +338,26 @@ export function getBinarySizeFromString(content: string) {
   const encoded = encoder.encode(content);
   return (encoded.length / 1024).toFixed(3);
 }
+
+export function convertFloat32ArrayToPCMBase64(
+  float32Array: Float32Array,
+): string {
+  // Create ArrayBuffer to hold PCM data
+  const arrayBuffer = new ArrayBuffer(float32Array.length * 2); // 16-bit PCM = 2 bytes per sample
+  const dataView = new DataView(arrayBuffer);
+
+  // Convert Float32Array to PCM
+  for (let i = 0; i < float32Array.length; i++) {
+    // Clamp values to [-1, 1]
+    const sample = Math.max(-1, Math.min(1, float32Array[i]));
+
+    // Convert to 16-bit PCM
+    const int16Sample = Math.round(sample * 32767); // multiply by 32767 instead of 32768 to avoid potential overflow
+
+    // Write to ArrayBuffer as little-endian
+    dataView.setInt16(i * 2, int16Sample, true);
+  }
+
+  // Convert to Base64
+  return arrayBufferToBase64(arrayBuffer);
+}

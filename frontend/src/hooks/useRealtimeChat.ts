@@ -109,9 +109,7 @@ const useRealtimeChat = (props: Props) => {
         ...userStream,
         videoElement: videoElement?.current,
       },
-      vadOptions: {
-        ...vadOptions,
-      },
+      vadOptions,
       onVADOpen: setVadOpen,
       onActive: active => {
         setActive(active);

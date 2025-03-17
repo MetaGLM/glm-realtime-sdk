@@ -6,8 +6,7 @@ import {
   InputAudioBufferAppend,
   InputAudioBufferAppendVideoFrame,
   RealtimeClientEvent,
-  RealtimeClientEventStruct,
-  RealtimeEventStruct,
+  RealtimeHistoryItem,
   RealtimeServerEvent,
   ResponseAudioDelta,
 } from '@/types/realtime';
@@ -19,78 +18,79 @@ type Props = {
 };
 
 type LabelProps = {
-  item: RealtimeEventStruct;
+  item: RealtimeHistoryItem;
 };
 
 const Label: FC<LabelProps> = memo(({ item }) => {
   const extra = useMemo(() => {
     let extra: ReactNode = '';
-    if ((item as ResponseAudioDelta).delta) {
+    const data = item.data;
+    if ((data as ResponseAudioDelta).delta) {
       extra = (
         <Tag color="green" bordered={false}>
-          {(item as ResponseAudioDelta).delta?.split(',').length}
+          {(data as ResponseAudioDelta).delta?.split(',').length}
         </Tag>
       );
-    } else if ((item as InputAudioBufferAppend).audio) {
+    } else if ((data as InputAudioBufferAppend).audio) {
       extra = (
         <Tag color="green" bordered={false}>
-          {(item as InputAudioBufferAppend).audio?.split(',').length}
+          {(data as InputAudioBufferAppend).audio?.split(',').length}
         </Tag>
       );
-    } else if ((item as InputAudioBufferAppendVideoFrame).video_frame) {
+    } else if ((data as InputAudioBufferAppendVideoFrame).video_frame) {
       extra = (
         <Tag color="green" bordered={false}>
           {
-            (item as InputAudioBufferAppendVideoFrame).video_frame?.split(',')
+            (data as InputAudioBufferAppendVideoFrame).video_frame?.split(',')
               .length
           }
         </Tag>
       );
     } else if (
-      item.type === RealtimeServerEvent.ResponseFunctionCallArgumentsDone
+      data.type === RealtimeServerEvent.ResponseFunctionCallArgumentsDone
     ) {
       extra = (
         <Tag color="processing" bordered={false}>
-          工具调用：{item.name}
+          工具调用：{data.name}
         </Tag>
       );
-    } else if (item.type === RealtimeClientEvent.ConversationItemCreate) {
+    } else if (data.type === RealtimeClientEvent.ConversationItemCreate) {
       extra = (
         <Tag color="processing" bordered={false}>
           上报FC调用结果
         </Tag>
       );
-    } else if (item.type === RealtimeServerEvent.SessionUpdated) {
+    } else if (data.type === RealtimeServerEvent.SessionUpdated) {
       extra = (
         <Tag color="warning" bordered={false}>
           会话配置更新
         </Tag>
       );
-    } else if (item.type === RealtimeClientEvent.ResponseCancel) {
+    } else if (data.type === RealtimeClientEvent.ResponseCancel) {
       extra = (
         <Tag color="red" bordered={false}>
           打断
         </Tag>
       );
-    } else if (item.type === RealtimeServerEvent.InputAudioBufferCommitted) {
-      extra = <Tag>{item.item_id}</Tag>;
-    } else if (item.type === RealtimeServerEvent.SessionCreated) {
-      extra = <Tag>{item.session.id}</Tag>;
-    } else if (item.type === RealtimeServerEvent.ResponseCreated) {
-      extra = <Tag>{item.response.id}</Tag>;
-    } else if (item.type === RealtimeServerEvent.ResponseDone) {
+    } else if (data.type === RealtimeServerEvent.InputAudioBufferCommitted) {
+      extra = <Tag>{data.item_id}</Tag>;
+    } else if (data.type === RealtimeServerEvent.SessionCreated) {
+      extra = <Tag>{data.session.id}</Tag>;
+    } else if (data.type === RealtimeServerEvent.ResponseCreated) {
+      extra = <Tag>{data.response.id}</Tag>;
+    } else if (data.type === RealtimeServerEvent.ResponseDone) {
       extra = (
         <>
           <Tag color="purple" bordered={false}>
-            input: {item.response.usage?.input_tokens ?? '--'}
+            input: {data.response.usage?.input_tokens ?? '--'}
           </Tag>
           <Tag color="purple" bordered={false}>
-            output: {item.response.usage?.output_tokens ?? '--'}
+            output: {data.response.usage?.output_tokens ?? '--'}
           </Tag>
         </>
       );
     } else if (
-      item.type ===
+      data.type ===
       RealtimeServerEvent.ConversationItemInputAudioTranscriptionCompleted
     ) {
       extra = (
@@ -105,12 +105,12 @@ const Label: FC<LabelProps> = memo(({ item }) => {
   return (
     <Flex justify="space-between" align="center">
       <div>
-        {(item as RealtimeClientEventStruct).client_timestamp ? (
+        {item.role === 'user' ? (
           <ArrowUpOutlined className={styles.client} />
         ) : (
           <ArrowDownOutlined className={styles.server} />
         )}{' '}
-        <span className={styles.eventName}>{item.type}</span>
+        <span className={styles.eventName}>{item.data.type}</span>
       </div>
       <div>
         <span>{extra}</span>
@@ -125,11 +125,10 @@ const ChatLog: FC<Props> = memo(({ historyList = [] }) => {
   useEffect(() => {
     if (
       historyListContainer.current &&
-      historyList.length &&
-      historyList[historyList.length - 1].type !==
-        RealtimeClientEvent.InputAudioBufferAppendVideoFrame &&
-      historyList[historyList.length - 1].type !==
-        RealtimeClientEvent.InputAudioBufferAppend
+      historyList.at(-1)?.data.type !==
+      RealtimeClientEvent.InputAudioBufferAppendVideoFrame &&
+      historyList.at(-1)?.data.type !==
+      RealtimeClientEvent.InputAudioBufferAppend
     ) {
       (historyListContainer.current as unknown as HTMLDivElement)?.scrollTo({
         top: (historyListContainer.current as unknown as HTMLDivElement)
@@ -149,9 +148,9 @@ const ChatLog: FC<Props> = memo(({ historyList = [] }) => {
         bordered={false}
         items={historyList.map(item => {
           return {
-            key: item.event_id,
+            key: item.data.event_id,
             label: <Label item={item} />,
-            children: <pre>{JSON.stringify(item, null, 2)}</pre>,
+            children: <pre>{JSON.stringify(item.data, null, 2)}</pre>,
           };
         })}
       />

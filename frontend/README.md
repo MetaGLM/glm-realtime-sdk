@@ -31,7 +31,7 @@ pnpm run dev
 .src
 ├── components/                   # web demo用到的组件
 ├── consts/realtime.ts            # 用到的常量和测试触发用的tools
-├── hooks/useRealtimeChat.ts      # 基于react使用风格封装realtimeSDK的hooks             
+├── hooks/useRealtimeChat.ts      # 基于react使用风格封装realtimeSDK的hooks
 ├── pages/RealtimeVideo           # 示例Demo页
 ├── styles/                       # 样式文件
 ├── types/realtime.ts             # Realtime 协议的类型定义
@@ -42,7 +42,8 @@ pnpm run dev
 
 ## Realtime Client SDK
 
-基于 WebSocket 的实时对话 SDK，支持语音输入、语音合成(TTS)、视频输入等功能。理论上也兼容 openai realtime 协议。你可以根据自己的需求进行修改和扩展，替换相应模块。
+基于 WebSocket 的实时对话 SDK，支持语音输入、语音合成(TTS)、视频输入等功能。理论上也兼容 openai realtime
+协议。你可以根据自己的需求进行修改和扩展，替换相应模块。
 
 ### 结构
 
@@ -115,12 +116,12 @@ realtime.start();
 
 #### SessionConfig
 
-| 属性名                | 类型             | 描述                                |
-|--------------------|----------------|-----------------------------------|
-| tools              | Array          | 工具列表                              |
-| instructions       | string         | 系统提示词                             |
-| voice              | string         | 音色                                |
-| tts_source         | TTSSource      | TTS来源                             |
+| 属性名             | 类型           | 描述                                            |
+| ------------------ | -------------- | ----------------------------------------------- |
+| tools              | Array          | 工具列表                                        |
+| instructions       | string         | 系统提示词                                      |
+| voice              | string         | 音色                                            |
+| tts_source         | TTSSource      | TTS来源                                         |
 | input_audio_format | 'wav' \| 'pcm' | pcm后可追加采样率比如\"pcm16\"表示16khz，默认16 |
 
 #### VADOptions
@@ -153,21 +154,90 @@ realtime.start();
 
 ### 方法(public)
 
-| 方法名                 | 参数                                                                               | 描述                                                                                                 |
-|---------------------|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| start               | () => Promise<void>                                                              | 实例创建后调用，依次初始化用户音频流，本地VAD，流式播放器，建立ws连接，连接打开后结束                                                      |
-| destroy             | () => void                                                                       | 关闭或销毁所有功能模块，消息历史等保留                                                                                |
-| updateSessionConfig | () => void                                                                       | 更新会话配置，会从实例各属性中收集相关字段，每次更新都会上报完整的集合（你用到的部分）                                                        |
-| setInstructions     | (instructions: string) => this                                                   | 设置SystemPrompt，不主动更新sessionConfig                                                                  |
-| setToolsConfig      | (tools: string) => this                                                          | 设置自定义的function call tools，方法自行转换，最外层要求是个数组，不主动更新sessionConfig                                      |
-| setTTSVoice         | (voice: string) => void                                                          | 切换音色                                                                                               |
-| setTTSSource        | (source: TTSSource) => this                                                      | 切换tts来源，下次response生效                                                                               |
-| setInputMode        | (mode: 'manual' \| 'localVAD' \|'serverVAD' ) => void                            | 切换输入模式，先卸载当前模式，再装载新的模式，对于本地模式与远程模式之间的转换，需要等到session.updated之后再装载，期间无法输入                            |
-| manualTalk          | () => void                                                                       | 手动发言开始，结束前会不停发送音频，无VAD检测                                                                           |
-| releaseManualTalk   | () => void                                                                       | 释放手动发言，会执行speechEnd的行为                                                                             |
-| setInputAudioFormat | (format?: 'wav' \| 'pcm' \| string) => void                                      | 输入音频格式，默认wav，pcm后可追加采样率，比如\"pcm16\"表示16khz，默认16khz                                                        |
+#### SDK实例
+
+| 方法名              | 参数                                                                             | 描述                                                                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| start               | () => Promise<void>                                                              | 实例创建后调用，依次初始化用户音频流，本地VAD，流式播放器，建立ws连接，连接打开后结束                                                              |
+| destroy             | () => void                                                                       | 关闭或销毁所有功能模块，消息历史等保留                                                                                                             |
+| updateSessionConfig | () => void                                                                       | 更新会话配置，会从实例各属性中收集相关字段，每次更新都会上报完整的集合（你用到的部分）                                                             |
+| setInstructions     | (instructions: string) => this                                                   | 设置SystemPrompt，不主动更新sessionConfig                                                                                                          |
+| setToolsConfig      | (tools: string) => this                                                          | 设置自定义的function call tools，方法自行转换，最外层要求是个数组，不主动更新sessionConfig                                                         |
+| setTTSVoice         | (voice: string) => void                                                          | 切换音色                                                                                                                                           |
+| setTTSSource        | (source: TTSSource) => this                                                      | 切换tts来源，下次response生效                                                                                                                      |
+| setInputMode        | (mode: 'manual' \| 'localVAD' \|'serverVAD' ) => void                            | 切换输入模式，先卸载当前模式，再装载新的模式，对于本地模式与远程模式之间的转换，需要等到session.updated之后再装载，期间无法输入                    |
+| manualTalk          | () => void                                                                       | 手动发言开始，结束前会不停发送音频，无VAD检测                                                                                                      |
+| releaseManualTalk   | () => void                                                                       | 释放手动发言，会执行speechEnd的行为                                                                                                                |
+| setInputAudioFormat | (format?: 'wav' \| 'pcm' \| string) => void                                      | 输入音频格式，默认wav，pcm后可追加采样率，比如\"pcm16\"表示16khz，默认16khz                                                                        |
 | setTTSFormat        | (format: 'mp3' \| 'pcm') => void                                                 | 切换tts音频格式，被动更新，在session.updated之后注册任务到下一次input_audio_buffer.committed再正式切换播放器，因为模型可能连续发消息(主动发言或fc) |
-| appendEventTask     | (eventType: RealtimeServerEvent, eventTask: () => Promise<void> \| void) => void | 在realtime的事件循环中注册任务                                                                                |
+| appendEventTask     | (eventType: RealtimeServerEvent, eventTask: () => Promise<void> \| void) => void | 在realtime的事件循环中注册任务                                                                                                                     |
+
+#### vad模块
+
+| 方法名       | 参数                | 描述                           |
+| ------------ | ------------------- | ------------------------------ |
+| init         | () => Promise<void> | 创建vad实例，加载相关资源      |
+| start        | () => void          | 开启VAD检测用户发言            |
+| pause        | () => void          | 暂停VAD检测用户发言            |
+| destroy      | () => void          | 关闭vad的运行状态并销毁vad实例 |
+| concatRecord | () => void          | 拼接用户每个分句的录音片段     |
+| clearRecord  | () => void          | 置空用户录音                   |
+
+#### userStream模块
+
+| 方法名          | 参数                                                                 | 描述                                                            |
+| --------------- | -------------------------------------------------------------------- | --------------------------------------------------------------- |
+| init            | () => Promise<void>                                                  | 同时初始化音视频流，realtime 协议默认以音频启动，所以没用到这个 |
+| initVideoStream | () => Promise<void>                                                  | 初始化用户视频流，直到播放器加载到了视频                        |
+| stopVideoStream | () => void                                                           | 卸载视频流                                                      |
+| captureVideo    | () => Promise<{base64: string; url: string}>                         | 捕获视频流截图                                                  |
+| setFacingMode   | (mode: 'user' \| 'environment') => void                              | 切换前后摄像头并重新初始化视频流                                |
+| setResolution   | (constraints: MediaTrackConstraints) => void                         | 设置视频分辨率                                                  |
+| setVideoDevice  | (device: 'screen' \| 'camera', deviceID: string = 'default') => void | 设置视频流设备ID并重新初始化视频流                              |
+| initAudioStream | () => Promise<void>                                                  | 初始化用于用户输入的音频流，过程中可以对音频流进行预处理        |
+| destroy         | () => void                                                           | 卸载所有音视频流，销毁相关实例                                  |
+
+#### streamPlayer模块
+
+| 方法名                  | 参数                   | 返回值            | 描述                                                                   |
+| ----------------------- | ---------------------- | ----------------- | ---------------------------------------------------------------------- |
+| setFormat               | format: 'mp3' \| 'pcm' | Promise<void>     | 设置音频格式，切换播放器类型。如果有任务进行中，新格式将在下轮对话生效 |
+| createMediaStreamPlayer | 无                     | MediaStreamPlayer | 创建MediaStreamPlayer实例                                              |
+| createPcmPlayer         | 无                     | PCMPlayer         | 创建PCMPlayer实例                                                      |
+| get playing             | 无                     | boolean           | 获取当前播放状态                                                       |
+| init                    | 无                     | Promise<void>     | 初始化播放器                                                           |
+| append                  | audioParts: string     | void              | 添加音频数据，根据format类型进行不同的处理                             |
+| reset                   | 无                     | void              | 重置播放器状态                                                         |
+| pause                   | 无                     | void              | 暂停播放                                                               |
+| destroy                 | 无                     | void              | 销毁播放器实例并清空ttsChunks                                          |
+| endOfStream             | 无                     | void              | 结束MediaSource的流管理（仅mp3格式可用）                               |
+| adaptBuffer             | data: BufferSource     | void              | 调度音频切片的追加或排队（仅mp3格式可用）                              |
+| checkBufferUpdating     | 无                     | boolean           | 检查buffer是否处理完成（仅mp3格式可用）                                |
+
+#### mediaStreamPlayer模块
+
+| 方法名              | 参数               | 返回值        | 描述                                                                                    |
+| ------------------- | ------------------ | ------------- | --------------------------------------------------------------------------------------- |
+| append              | data: BufferSource | void          | 将音频片段追加到 sourceBuffer，并设置 updateend 事件监听器，形成串行事件流              |
+| init                | 无                 | Promise<void> | 初始化媒体源，创建新的 MediaSource 实例并设置相关配置                                   |
+| reset               | 无                 | Promise<void> | 重置 MediaSource，用于在每轮对话结束后释放资源并创建新的媒体源                          |
+| destroy             | 无                 | void          | 结束媒体流并中止正在进行的 sourceBuffer 更新，移除音频事件监听                          |
+| pause               | 无                 | void          | 暂停音频播放并更新播放状态                                                              |
+| endOfStream         | 无                 | void          | 当 MediaSource 处于 open 状态时，结束媒体流                                             |
+| adaptBuffer         | data: BufferSource | void          | 调度音频切片，根据当前状态决定直接追加还是加入队列                                      |
+| checkBufferUpdating | 无                 | boolean       | 检查 buffer 是否正在更新，包括检查 bufferUpdating 状态、sourceBuffer 更新状态和队列长度 |
+
+#### pcmPlayer模块
+
+根据 <mcfile name="pcmPlayer.ts" path="/Users/zhangzichen/WebstormProjects/glm-realtime-sdk/frontend/src/utils/chatSDK/lib/pcmPlayer.ts"></mcfile> 文件，我为您总结了所有公开的实例方法：
+
+| 方法名  | 参数                     | 返回值        | 描述                                                   |
+| ------- | ------------------------ | ------------- | ------------------------------------------------------ |
+| init    | 无                       | Promise<void> | 初始化PCM播放器，销毁已有实例并创建新实例，设置音量为2 |
+| append  | audioParts: Float32Array | void          | 添加PCM音频数据到播放器进行播放                        |
+| reset   | 无                       | void          | 重置PCM播放器，实际上是重新初始化                      |
+| destroy | 无                       | void          | 销毁PCM播放器实例并清空引用                            |
+| pause   | 无                       | void          | 暂停PCM音频播放                                        |
 
 ### 客户端事件
 
@@ -313,6 +383,3 @@ realtime.start();
 - 报错信息为Failed to load module script: Expected a JavaScript module script but the server responded with MIME type of
   application/octet-stream；Encountered an error while loading model file /sillero_vad_legacy.onnx
 - 需要调整部署网页的服务器配置，将.mjs文件的Content-Type配置为text/javascript或application/javascript
-
-### TODO：
-- 添加一个移动端demo

@@ -1,0 +1,51 @@
+.indicator {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  color: #fff;
+
+  .dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    div {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: #fff;
+    }
+  }
+}
+
+.speeching div:nth-child(1) {
+  animation: speeching 0.8s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.speeching div:nth-child(2) {
+  animation: speeching 0.5s ease-in-out infinite;
+  animation-delay: 0.1s;
+}
+
+.speeching div:nth-child(3) {
+  animation: speeching 1s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+.speeching div:nth-child(4) {
+  animation: speeching 1.2s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+@keyframes speeching {
+  0%,
+  100% {
+    //transform: scaleY(1);
+    height: 5px;
+  }
+  50% {
+    //transform: scaleY(10);
+    height: 20px;
+  }
+}

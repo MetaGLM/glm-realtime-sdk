@@ -21,7 +21,7 @@ type RealtimeClient interface {
 
 type realtimeClient struct {
 	url, apiKey string
-	onReceived  func(event* events.Event) error
+	onReceived  func(event *events.Event) error
 	conn        *websocket.Conn
 
 	isConnected bool
@@ -79,7 +79,7 @@ func (r *realtimeClient) Disconnect() (err error) {
 
 func (r *realtimeClient) Wait() {
 	log.Printf("[RealtimeClient] Waiting for exit...\n")
-    r.wg.Wait()
+	r.wg.Wait()
 	log.Printf("[RealtimeClient] Exited\n")
 }
 
@@ -107,7 +107,7 @@ func (r *realtimeClient) readWsMsg() {
 			log.Printf("[RealtimeClient] Read response failed, type: %d, message: %s, err: %v\n", messageType, string(message), err)
 			return
 		}
-		log.Printf("[RealtimeClient] Received message type: %d, message len: %d\n", messageType, len(message))
+		// log.Printf("[RealtimeClient] Received message type: %d, message len: %d\n", messageType, len(message))
 		if r.onReceived == nil {
 			log.Printf("[RealtimeClient] OnReceived is nil, skipping...\n")
 			continue
@@ -115,12 +115,12 @@ func (r *realtimeClient) readWsMsg() {
 		event := &events.Event{}
 		if err = json.Unmarshal(message, event); err != nil {
 			log.Printf("[RealtimeClient] Unmarshal failed, err: %v\n", err)
-			r.Disconnect()
+			_ = r.Disconnect()
 			return
 		}
 		if err = r.onReceived(event); err != nil {
 			log.Printf("[RealtimeClient] OnReceived failed, err: %v\n", err)
-			r.Disconnect()
+			_ = r.Disconnect()
 			return
 		}
 	}

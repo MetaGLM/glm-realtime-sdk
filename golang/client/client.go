@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -28,6 +29,8 @@ type realtimeClient struct {
 	lock        sync.RWMutex
 	wg          *sync.WaitGroup
 }
+
+const waitTimeout = 30 * time.Second // Define a default timeout for wait
 
 func NewRealtimeClient(url, apiKey string, onReceived func(event *events.Event) error) *realtimeClient {
 	return &realtimeClient{url: url, apiKey: apiKey, onReceived: onReceived}
@@ -78,9 +81,21 @@ func (r *realtimeClient) Disconnect() (err error) {
 }
 
 func (r *realtimeClient) Wait() {
-	log.Printf("[RealtimeClient] Waiting for exit...\n")
-	r.wg.Wait()
-	log.Printf("[RealtimeClient] Exited\n")
+	log.Printf("[RealtimeClient] Waiting for exit with timeout %ss ...\n", waitTimeout)
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done) // Ensure channel is closed when Wait() returns
+		r.wg.Wait()
+	}()
+
+	select {
+	case <-done:
+		log.Printf("[RealtimeClient] Exited normally.")
+	case <-time.After(waitTimeout):
+		log.Printf("[RealtimeClient] Wait timed out after %vs.", waitTimeout)
+		// Consider adding further action if timeout occurs, e.g., cancelling context or returning an error
+	}
 }
 
 func (r *realtimeClient) Send(event *events.Event) (err error) {
@@ -101,9 +116,24 @@ func (r *realtimeClient) Send(event *events.Event) (err error) {
 
 func (r *realtimeClient) readWsMsg() {
 	defer r.wg.Done()
+	deadline := time.Now().Add(waitTimeout)
 	for r.IsConnected() {
+		if time.Now().After(deadline) {
+			log.Printf("[RealtimeClient] ReadWsMsg loop timed out after %vs", waitTimeout)
+			return
+		}
+
+		if conn := r.conn; conn != nil {
+			if err := conn.SetReadDeadline(time.Now().Add(15 * time.Second)); err != nil {
+				log.Printf("[RealtimeClient] SetReadDeadline failed: %v", err)
+			}
+		}
 		messageType, message, err := r.conn.ReadMessage()
 		if err != nil {
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				log.Printf("[RealtimeClient] ReadMessage timed out, continuing...")
+				continue
+			}
 			log.Printf("[RealtimeClient] Read response failed, type: %d, message: %s, err: %v\n", messageType, string(message), err)
 			return
 		}

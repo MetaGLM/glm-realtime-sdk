@@ -11,8 +11,8 @@ const (
 
 type Content struct {
 	Type       ContentType `json:"type"`
-	Transcript *string     `json:"transcript"`
-	Text       *string     `json:"text"`
+	Transcript *string     `json:"transcript,omitempty"`
+	Text       *string     `json:"text,omitempty"`
 }
 
 type ItemStatus string
@@ -46,11 +46,14 @@ const (
 )
 
 type Item struct {
-	ID      string     `json:"id"`
-	Object  ItemObject `json:"object"`
-	Type    ItemType   `json:"type"`
-	Status  ItemStatus `json:"status"`
-	Role    ItemRole   `json:"role"`
-	Content []Content  `json:"content"`
-	Output  *string    `json:"output,omitempty"`
+	ID        string     `json:"id"`
+	Object    ItemObject `json:"object"`
+	Type      ItemType   `json:"type"`
+	Status    ItemStatus `json:"status"`
+	Role      ItemRole   `json:"role"`
+	Content   []Content  `json:"content,omitempty"`
+	Output    *string    `json:"output,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	CallId    string     `json:"call_id,omitempty"`
+	Arguments string     `json:"arguments,omitempty"`
 }

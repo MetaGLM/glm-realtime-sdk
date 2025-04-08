@@ -26,7 +26,7 @@ type Response struct {
 	ToolChoice        string         `json:"tool_choice,omitempty"`
 	Temperature       float64        `json:"temperature,omitempty"`
 	MaxOutputTokens   int            `json:"max_output_tokens,omitempty"`
-	Usage             Usage          `json:"usage,omitempty"`
+	Usage             *Usage         `json:"usage,omitempty"`
 	Output            []Item         `json:"output,omitempty"`
 }
 
@@ -38,14 +38,14 @@ type TokenUsageFromUpstream struct {
 }
 
 type Usage struct {
-	TotalTokens        int64                `json:"total_tokens"`
-    InputTokens        int64                `json:"input_tokens"`
-    OutputTokens       int64                `json:"output_tokens"`
-    InputTokenDetails  TokenDetails       `json:"input_token_details"`
-    OutputTokenDetails TokenDetails       `json:"output_token_details"`
+	TotalTokens        int64        `json:"total_tokens"`
+	InputTokens        int64        `json:"input_tokens"`
+	OutputTokens       int64        `json:"output_tokens"`
+	InputTokenDetails  TokenDetails `json:"input_token_details"`
+	OutputTokenDetails TokenDetails `json:"output_token_details"`
 }
 
 type TokenDetails struct {
-    TextTokens  int `json:"text_tokens"`
-    AudioTokens int `json:"audio_tokens"`
+	TextTokens  int `json:"text_tokens"`
+	AudioTokens int `json:"audio_tokens"`
 }

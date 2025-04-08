@@ -8,15 +8,16 @@ type EventType string
 
 const (
 	// Client events
-	RealtimeClientEventSessionUpdate            EventType = "session.update"
-	RealtimeClientEventInputAudioBufferAppend   EventType = "input_audio_buffer.append"
-	RealtimeClientEventInputAudioBufferCommit   EventType = "input_audio_buffer.commit"
-	RealtimeClientEventInputAudioBufferClear    EventType = "input_audio_buffer.clear"
-	RealtimeClientEventConversationItemCreate   EventType = "conversation.item.create"
-	RealtimeClientEventConversationItemTruncate EventType = "conversation.item.truncate"
-	RealtimeClientEventConversationItemDelete   EventType = "conversation.item.delete"
-	RealtimeClientEventResponseCreate           EventType = "response.create"
-	RealtimeClientEventResponseCancel           EventType = "response.cancel"
+	RealtimeClientEventSessionUpdate              EventType = "session.update"
+	RealtimeClientEventInputAudioBufferAppend     EventType = "input_audio_buffer.append"
+	RealtimeClientEventInputAudioBufferCommit     EventType = "input_audio_buffer.commit"
+	RealtimeClientEventInputAudioBufferClear      EventType = "input_audio_buffer.clear"
+	RealtimeClientEventConversationItemCreate     EventType = "conversation.item.create"
+	RealtimeClientEventConversationItemTruncate   EventType = "conversation.item.truncate"
+	RealtimeClientEventConversationItemDelete     EventType = "conversation.item.delete"
+	RealtimeClientEventResponseCreate             EventType = "response.create"
+	RealtimeClientEventResponseCancel             EventType = "response.cancel"
+	RealtimeClientEventTranscriptionSessionUpdate EventType = "transcription_session.update"
 
 	// Server events
 	RealtimeServerEventError                                            EventType = "error"
@@ -46,6 +47,7 @@ const (
 	RealtimeServerEventResponseAudioDone                                EventType = "response.audio.done"
 	RealtimeServerEventResponseFunctionCallArgumentsDelta               EventType = "response.function_call_arguments.delta"
 	RealtimeServerEventResponseFunctionCallArgumentsDone                EventType = "response.function_call_arguments.done"
+	RealtimeServerEventTranscriptionSessionUpdated                      EventType = "transcription_session.updated"
 	RealtimeServerEventRateLimitsUpdated                                EventType = "rate_limits.updated"
 
 	// Customized events
@@ -68,6 +70,7 @@ type Event struct {
 	Delta           string        `json:"delta"`
 	Item            *Item         `json:"item,omitempty"`
 	ClientTimestamp int64         `json:"client_timestamp,omitempty"`
+	Text            string        `json:"text,omitempty"`
 	Transcript      string        `json:"transcript,omitempty"`
 	Name            string        `json:"name,omitempty"`
 	Arguments       string        `json:"arguments,omitempty"`
@@ -75,6 +78,10 @@ type Event struct {
 	Instructions    string        `json:"instructions,omitempty"`
 	Error           *EventError   `json:"error,omitempty"`
 	Conversation    *Conversation `json:"conversation,omitempty"`
+	Part            *ContentPart  `json:"part,omitempty"`
+	AudioStartMS    int64         `json:"audio_start_ms,omitempty"`
+	AudioEndMS      int64         `json:"audio_end_ms,omitempty"`
+	RateLimits      []RateLimit   `json:"rate_limits,omitempty"`
 	// BetaFields      *BetaFields `json:"beta_fields,omitempty"`
 }
 
@@ -90,6 +97,13 @@ type Conversation struct {
 	Object string `json:"object"`
 }
 
+type ContentPart struct {
+	Type       ContentType `json:"type"`
+	Text       string      `json:"text,omitempty"`
+	Audio      string      `json:"audio,omitempty"`
+	Transcript string      `json:"transcript,omitempty"`
+}
+
 func (e *Event) ToJson() string {
 	json, err := json.Marshal(e)
 	if err != nil {
@@ -100,6 +114,7 @@ func (e *Event) ToJson() string {
 
 type Modality string
 type ChatMode string
+type DenoiseType string
 
 const (
 	ModalityText  Modality = "text"
@@ -113,22 +128,33 @@ const (
 	ChatModeVideoProactive ChatMode = "video_preactive"
 )
 
+var DefaultModalities = []Modality{ModalityText, ModalityAudio}
+
+const (
+	DenoiseTypeNearField DenoiseType = "near_field"
+	DenoiseTypeFarField  DenoiseType = "far_field"
+)
+
 type Session struct {
-	ID                      string                   `json:"id,omitempty"`
-	Object                  string                   `json:"object,omitempty"`
-	Model                   string                   `json:"model,omitempty"`
-	Modalities              []Modality               `json:"modalities,omitempty"`
-	Instructions            string                   `json:"instructions"`
-	Voice                   string                   `json:"voice,omitempty"`
-	InputAudioFormat        string                   `json:"input_audio_format"`
-	OutputAudioFormat       string                   `json:"output_audio_format"`
-	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
-	TurnDetection           *TurnDetection           `json:"turn_detection,omitempty"`
-	Tools                   []Tool                   `json:"tools"`
-	ToolChoice              string                   `json:"tool_choice,omitempty"`
-	Temperature             float64                  `json:"temperature,omitempty"`
-	MaxOutputTokens         any                      `json:"max_output_tokens,omitempty"` // "inf" or int
-	BetaFields              *BetaFields              `json:"beta_fields"`
+	ID                       string                   `json:"id,omitempty"`
+	Object                   string                   `json:"object,omitempty"`
+	Model                    string                   `json:"model,omitempty"`
+	Modalities               []Modality               `json:"modalities,omitempty"`
+	Instructions             string                   `json:"instructions,omitempty"`
+	Voice                    string                   `json:"voice,omitempty"`
+	InputAudioFormat         string                   `json:"input_audio_format,omitempty"`
+	OutputAudioFormat        string                   `json:"output_audio_format,omitempty"`
+	InputAudioTranscription  *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
+	TurnDetection            *TurnDetection           `json:"turn_detection,omitempty"`
+	Tools                    []Tool                   `json:"tools,omitempty"`
+	ToolChoice               string                   `json:"tool_choice,omitempty"`
+	Temperature              float64                  `json:"temperature,omitempty"`
+	MaxResponseOutputTokens  any                      `json:"max_response_output_tokens,omitempty"` // "inf" or int
+	InputAudioNoiseReduction *NoiseReduction          `json:"input_audio_noise_reduction,omitempty"`
+	BetaFields               *BetaFields              `json:"beta_fields,omitempty"`
+	// 这里是专门为了调式用的， 必须为指针，内部字段不暴露
+	FlowBackend *string `json:"flow_backend,omitempty"`
+	TTSBackend  *string `json:"tts_backend,omitempty"`
 }
 
 type InputAudioTranscription struct {
@@ -137,17 +163,23 @@ type InputAudioTranscription struct {
 }
 
 type TurnDetection struct {
-	Type              string  `json:"type"`
+	Type              string  `json:"type,omitempty"`
 	Threshold         float64 `json:"threshold,omitempty"`
 	PrefixPaddingMs   int     `json:"prefix_padding_ms,omitempty"`
 	SilenceDurationMs int     `json:"silence_duration_ms,omitempty"`
+	CreateResponse    bool    `json:"create_response,omitempty"`
+	InterruptResponse bool    `json:"interrupt_response,omitempty"`
 }
 
-type TTSExtra struct {
-	Index    int    `json:"index"`
-	SubIndex int    `json:"sub_index"`
-	SubText  string `json:"sub_text"`
-	IsEnd    bool   `json:"is_end"`
+type NoiseReduction struct {
+	Type DenoiseType `json:"type"`
+}
+
+type RateLimit struct {
+	Name         string `json:"name"`
+	Limit        int    `json:"limit"`
+	Remaining    int    `json:"remaining"`
+	ResetSeconds int    `json:"reset_seconds"`
 }
 
 type SimpleBrowser struct {
@@ -158,14 +190,9 @@ type SimpleBrowser struct {
 }
 
 type BetaFields struct {
-	ChatMode        ChatMode       `json:"chat_mode,omitempty"`
-	ImageSizeX      int            `json:"image_size_x,omitempty"`
-	ImageSizeY      int            `json:"image_size_y,omitempty"`
-	FPS             int            `json:"fps,omitempty"`
-	TTSSource       string         `json:"tts_source,omitempty"`
-	TTSExtra        *TTSExtra      `json:"tts_extra,omitempty"`
-	SimpleBrowser   *SimpleBrowser `json:"simple_browser,omitempty"`
-	IsLastText      bool           `json:"is_last_text,omitempty"`
-	MessageID       string         `json:"message_id,omitempty"`
-	AutoSearch      *bool          `json:"auto_search,omitempty"`
+	ChatMode      ChatMode       `json:"chat_mode,omitempty"`
+	FPS           int            `json:"fps,omitempty"`
+	TTSSource     string         `json:"tts_source,omitempty"`
+	SimpleBrowser *SimpleBrowser `json:"simple_browser,omitempty"`
+	AutoSearch    *bool          `json:"auto_search,omitempty"` // 是否自动搜索
 }

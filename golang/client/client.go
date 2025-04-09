@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -130,10 +129,6 @@ func (r *realtimeClient) readWsMsg() {
 		}
 		messageType, message, err := r.conn.ReadMessage()
 		if err != nil {
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				log.Printf("[RealtimeClient] ReadMessage timed out, continuing...")
-				continue
-			}
 			log.Printf("[RealtimeClient] Read response failed, type: %d, message: %s, err: %v\n", messageType, string(message), err)
 			return
 		}

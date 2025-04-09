@@ -81,7 +81,7 @@ func (r *realtimeClient) Disconnect() (err error) {
 }
 
 func (r *realtimeClient) Wait() {
-	log.Printf("[RealtimeClient] Waiting for exit with timeout %ss ...\n", waitTimeout)
+	log.Printf("[RealtimeClient] Waiting for exit with timeout %v ...\n", waitTimeout)
 
 	done := make(chan struct{})
 	go func() {
@@ -93,7 +93,7 @@ func (r *realtimeClient) Wait() {
 	case <-done:
 		log.Printf("[RealtimeClient] Exited normally.")
 	case <-time.After(waitTimeout):
-		log.Printf("[RealtimeClient] Wait timed out after %vs.", waitTimeout)
+		log.Printf("[RealtimeClient] Wait timed out after %v.", waitTimeout)
 		// Consider adding further action if timeout occurs, e.g., cancelling context or returning an error
 	}
 }
@@ -119,7 +119,7 @@ func (r *realtimeClient) readWsMsg() {
 	deadline := time.Now().Add(waitTimeout)
 	for r.IsConnected() {
 		if time.Now().After(deadline) {
-			log.Printf("[RealtimeClient] ReadWsMsg loop timed out after %vs", waitTimeout)
+			log.Printf("[RealtimeClient] ReadWsMsg loop time out after %v", waitTimeout)
 			return
 		}
 

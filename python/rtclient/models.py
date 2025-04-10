@@ -630,5 +630,5 @@ def create_message_from_dict(data: dict) -> ServerMessageType:
             case _:
                 raise ValueError(f"Unknown event type: {event_type}")
     except Exception as e:
-        print(f"解析消息失败: {str(e)}, 原始消息: {data}")
+        print(f"未转换的消息: {str(e)}, 原始消息: {data}")
         return data

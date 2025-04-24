@@ -258,15 +258,15 @@ class Session(BaseModel):
     id: str
     model: str
     modalities: set[Modality]
-    instructions: str
-    voice: Voice
-    input_audio_format: AudioFormat
-    output_audio_format: AudioFormat
+    instructions: Optional[str] = None
+    voice: Optional[Voice] = None
+    input_audio_format: Optional[AudioFormat] = None
+    output_audio_format: Optional[AudioFormat] = None
     input_audio_transcription: Optional[InputAudioTranscription] = None
     turn_detection: Optional[TurnDetection] = None
     tools: Optional[ToolsDefinition] = None
-    tool_choice: ToolChoice
-    temperature: Temperature
+    tool_choice: Optional[ToolChoice] = None
+    temperature: Optional[Temperature] = None
     beta_fields: dict
 
 

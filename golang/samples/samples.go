@@ -35,7 +35,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 
 	dir, err := os.Getwd()
 	if err != nil {
-	    log.Fatalf("Error getting pwd: %v\n", err)
+		log.Fatalf("Error getting pwd: %v\n", err)
 		return
 	}
 
@@ -72,19 +72,19 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 		}
 		if event.Type == events.RealtimeServerEventResponseDone || event.Type == events.RealtimeServerEventError {
 			log.Printf("Received event: %s, exiting...\n", event.Type)
-			realtimeClient.Disconnect()
-			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0{
-			    os.WriteFile(outputFilePath + ".wav", bytes, 0644)
+			_ = realtimeClient.Disconnect()
+			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
+				_ = os.WriteFile(outputFilePath+".wav", bytes, 0644)
 			}
 		}
 		return nil
-    }
-    realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
+	}
+	realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
 
-    if err = realtimeClient.Connect(); err != nil {
-        log.Fatalf("Connect failed, error: %v\n", err)
-        return
-    }
+	if err = realtimeClient.Connect(); err != nil {
+		log.Fatalf("Connect failed, error: %v\n", err)
+		return
+	}
 	defer realtimeClient.Disconnect()
 
 	inputFile, err := os.Open(dir + inputFilePath)
@@ -107,7 +107,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 			return
 		}
 		if err = realtimeClient.Send(event); err != nil {
-			realtimeClient.Disconnect()
+			_ = realtimeClient.Disconnect()
 			break
 		}
 		if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
@@ -116,7 +116,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 			event.VideoFrame = nil
 		}
 		log.Printf("Sent message: %s\n\n", event.ToJson())
-		time.Sleep(135*time.Millisecond)
+		time.Sleep(135 * time.Millisecond)
 	}
 
 	if err = scanner.Err(); err != nil {
@@ -130,7 +130,7 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 
 	dir, err := os.Getwd()
 	if err != nil {
-	    log.Fatalf("Error getting pwd: %v\n", err)
+		log.Fatalf("Error getting pwd: %v\n", err)
 		return
 	}
 
@@ -143,7 +143,7 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 	}
 	defer file.Close()
 
-	wavBytes := make([][]byte, 0)
+	wavBytes, callId := make([][]byte, 0), ""
 	var status atomic.Uint32
 	var realtimeClient client.RealtimeClient
 	onReceived := func(event *events.Event) error {
@@ -166,24 +166,27 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 			log.Fatalf("Error writing to file: %v\n", err)
 			return err
 		}
-		if event.Type == events.RealtimeServerEventResponseFunctionCallArgumentsDone || event.Type == events.RealtimeServerEventResponseDone  {
+		if event.Type == events.RealtimeServerEventResponseFunctionCallArgumentsDone {
+			callId = event.CallID
+		}
+		if event.Type == events.RealtimeServerEventResponseFunctionCallArgumentsDone || event.Type == events.RealtimeServerEventResponseDone {
 			status.Add(1)
 		}
 		if status.Load() > 2 && event.Type == events.RealtimeServerEventResponseDone || event.Type == events.RealtimeServerEventError {
 			log.Printf("Received event: %s, exiting...\n", event.Type)
-			realtimeClient.Disconnect()
-			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0{
-			    os.WriteFile(outputFilePath + ".wav", bytes, 0644)
+			_ = realtimeClient.Disconnect()
+			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
+				_ = os.WriteFile(outputFilePath+".wav", bytes, 0644)
 			}
 		}
 		return nil
-    }
-    realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
+	}
+	realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
 
-    if err = realtimeClient.Connect(); err != nil {
-        log.Fatalf("Connect failed, error: %v\n", err)
-        return
-    }
+	if err = realtimeClient.Connect(); err != nil {
+		log.Fatalf("Connect failed, error: %v\n", err)
+		return
+	}
 	defer realtimeClient.Disconnect()
 
 	inputFile, err := os.Open(dir + inputFilePath)
@@ -208,8 +211,11 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 		for event.Type == events.RealtimeClientEventConversationItemCreate && status.Load() < 2 {
 			time.Sleep(time.Second)
 		}
+		if event.Type == events.RealtimeClientEventConversationItemCreate && event.Item != nil {
+			event.Item.CallId = callId
+		}
 		if err = realtimeClient.Send(event); err != nil {
-			realtimeClient.Disconnect()
+			_ = realtimeClient.Disconnect()
 			break
 		}
 		if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
@@ -218,7 +224,7 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 			event.VideoFrame = nil
 		}
 		log.Printf("Sent message: %s\n\n", event.ToJson())
-		time.Sleep(135*time.Millisecond)
+		time.Sleep(135 * time.Millisecond)
 	}
 
 	if err = scanner.Err(); err != nil {

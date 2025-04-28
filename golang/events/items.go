@@ -10,7 +10,7 @@ const (
 )
 
 type Content struct {
-	Type       ContentType `json:"type"`
+	Type       ContentType `json:"type,omitempty"`
 	Transcript *string     `json:"transcript,omitempty"`
 	Text       *string     `json:"text,omitempty"`
 }
@@ -50,7 +50,7 @@ type Item struct {
 	Object    ItemObject `json:"object"`
 	Type      ItemType   `json:"type"`
 	Status    ItemStatus `json:"status"`
-	Role      ItemRole   `json:"role"`
+	Role      ItemRole   `json:"role,omitempty"`
 	Content   []Content  `json:"content,omitempty"`
 	Output    *string    `json:"output,omitempty"`
 	Name      string     `json:"name,omitempty"`

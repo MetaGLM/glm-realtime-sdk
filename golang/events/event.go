@@ -13,6 +13,7 @@ const (
 	RealtimeClientEventInputAudioBufferCommit     EventType = "input_audio_buffer.commit"
 	RealtimeClientEventInputAudioBufferClear      EventType = "input_audio_buffer.clear"
 	RealtimeClientEventConversationItemCreate     EventType = "conversation.item.create"
+	RealtimeClientEventConversationItemRetrieve   EventType = "conversation.item.retrieve"
 	RealtimeClientEventConversationItemTruncate   EventType = "conversation.item.truncate"
 	RealtimeClientEventConversationItemDelete     EventType = "conversation.item.delete"
 	RealtimeClientEventResponseCreate             EventType = "response.create"
@@ -25,6 +26,7 @@ const (
 	RealtimeServerEventSessionUpdated                                   EventType = "session.updated"
 	RealtimeServerEventConversationCreated                              EventType = "conversation.created"
 	RealtimeServerEventConversationItemCreated                          EventType = "conversation.item.created"
+	RealtimeServerEventConversationItemRetrieved                        EventType = "conversation.item.retrieved"
 	RealtimeServerEventConversationItemInputAudioTranscriptionCompleted EventType = "conversation.item.input_audio_transcription.completed"
 	RealtimeServerEventConversationItemInputAudioTranscriptionFailed    EventType = "conversation.item.input_audio_transcription.failed"
 	RealtimeServerEventConversationItemTruncated                        EventType = "conversation.item.truncated"
@@ -70,9 +72,10 @@ type Event struct {
 	Delta           string        `json:"delta"`
 	Item            *Item         `json:"item,omitempty"`
 	ClientTimestamp int64         `json:"client_timestamp,omitempty"`
-	Text            string        `json:"text,omitempty"`
-	Transcript      string        `json:"transcript,omitempty"`
+	Text            *string       `json:"text,omitempty"`
+	Transcript      *string       `json:"transcript,omitempty"`
 	Name            string        `json:"name,omitempty"`
+	CallID          string        `json:"call_id,omitempty"`
 	Arguments       string        `json:"arguments,omitempty"`
 	VideoFrame      []byte        `json:"video_frame,omitempty"`
 	Instructions    string        `json:"instructions,omitempty"`
@@ -176,10 +179,10 @@ type NoiseReduction struct {
 }
 
 type RateLimit struct {
-	Name         string `json:"name"`
-	Limit        int    `json:"limit"`
-	Remaining    int    `json:"remaining"`
-	ResetSeconds int    `json:"reset_seconds"`
+	Name         string  `json:"name"`
+	Limit        int     `json:"limit"`
+	Remaining    int     `json:"remaining"`
+	ResetSeconds float32 `json:"reset_seconds"`
 }
 
 type SimpleBrowser struct {

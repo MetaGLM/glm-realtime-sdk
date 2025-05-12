@@ -22,6 +22,9 @@
  - Golang SDK: [README.md](golang/README.md)
  - TypeScript SDK: [README.md](frontend/README.md)
 
+## 项目走读
+https://deepwiki.com/MetaGLM/glm-realtime-sdk
+
 ## 许可证
 
 本项目采用 [LICENSE.md](LICENSE.md) 中规定的许可证。

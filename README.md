@@ -1,4 +1,6 @@
 # 智谱 Realtime Low Level SDK
+## 使用指南
+见开放平台 https://open.bigmodel.cn/dev/howuse/glm-realtime
 
 ## 接口文档 
 

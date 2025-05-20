@@ -55,17 +55,17 @@ async def send_audio(client: RTLowLevelClient, audio_file_path: str):
 
         print(f"音频信息: 采样率={frame_rate}Hz, 声道数={channels}, 位深={sample_width*8}位")
 
-        #  根据 servervad 的设置模拟一个较为贴合的场景, 计算相关参数, 实际使用时参数可以调整, ***不必严格遵守***
-        frame_size = 1536  # 固定帧大小（采样点数）
-        step_ms = 96  # 发送间隔（毫秒）
-        step_samples = int(frame_rate * step_ms / 1000)  # 每步采样点数
+        # 按照100ms一包切分音频
+        packet_ms = 100  # 每包时长（毫秒）
+        packet_samples = int(frame_rate * packet_ms / 1000)  # 每包采样点数
         bytes_per_sample = sample_width * channels
+        packet_bytes = packet_samples * bytes_per_sample  # 每包字节数
 
-        # 按步长分帧发送
-        for pos in range(0, len(audio_data), step_samples * bytes_per_sample):
-            # 提取当前帧数据
-            frame_bytes = audio_data[pos : pos + frame_size * bytes_per_sample]
-            if not frame_bytes:
+        # 按100ms一包分帧发送
+        for pos in range(0, len(audio_data), packet_bytes):
+            # 提取当前包数据
+            packet_data = audio_data[pos : pos + packet_bytes]
+            if not packet_data:
                 break
 
             # 构造WAV格式
@@ -74,7 +74,7 @@ async def send_audio(client: RTLowLevelClient, audio_file_path: str):
                 wav_out.setnchannels(channels)
                 wav_out.setsampwidth(sample_width)
                 wav_out.setframerate(frame_rate)
-                wav_out.writeframes(frame_bytes)
+                wav_out.writeframes(packet_data)
 
             # 发送数据
             wav_io.seek(0)
@@ -85,7 +85,7 @@ async def send_audio(client: RTLowLevelClient, audio_file_path: str):
 
             try:
                 await client.send(message)
-                await asyncio.sleep(step_ms / 1000)  # 等待下一帧
+                await asyncio.sleep(packet_ms / 1000)  # 等待下一包
             except Exception as e:
                 print(f"发送失败: {e}")
                 break

@@ -258,15 +258,15 @@ class Session(BaseModel):
     id: str
     model: str
     modalities: set[Modality]
-    instructions: str
-    voice: Voice
-    input_audio_format: AudioFormat
-    output_audio_format: AudioFormat
+    instructions: Optional[str] = None
+    voice: Optional[Voice] = None
+    input_audio_format: Optional[AudioFormat] = None
+    output_audio_format: Optional[AudioFormat] = None
     input_audio_transcription: Optional[InputAudioTranscription] = None
     turn_detection: Optional[TurnDetection] = None
     tools: Optional[ToolsDefinition] = None
-    tool_choice: ToolChoice
-    temperature: Temperature
+    tool_choice: Optional[ToolChoice] = None
+    temperature: Optional[Temperature] = None
     beta_fields: dict
 
 
@@ -630,5 +630,5 @@ def create_message_from_dict(data: dict) -> ServerMessageType:
             case _:
                 raise ValueError(f"Unknown event type: {event_type}")
     except Exception as e:
-        print(f"解析消息失败: {str(e)}, 原始消息: {data}")
+        print(f"未转换的消息: {str(e)}, 原始消息: {data}")
         return data

@@ -1,4 +1,6 @@
 # 智谱 Realtime Low Level SDK
+## 使用指南
+见开放平台 https://open.bigmodel.cn/dev/howuse/glm-realtime
 
 ## 接口文档 
 
@@ -21,6 +23,9 @@
  - Python SDK: [README.md](python/README.md)
  - Golang SDK: [README.md](golang/README.md)
  - TypeScript SDK: [README.md](frontend/README.md)
+
+## 项目走读
+https://deepwiki.com/MetaGLM/glm-realtime-sdk
 
 ## 许可证
 

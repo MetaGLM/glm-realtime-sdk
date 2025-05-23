@@ -48,7 +48,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 	}
 	defer file.Close()
 
-	wavBytes := make([][]byte, 0)
+	wavBytes, written := make([][]byte, 0), false
 	var realtimeClient client.RealtimeClient
 	onReceived := func(event *events.Event) error {
 		if event.Type == events.RealtimeServerEventResponseAudioDelta {
@@ -63,6 +63,8 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 				return err
 			}
 			wavBytes, event.Delta = append(wavBytes, bytes), "Ignored for logging"
+		} else if event.Type == events.RealtimeServerEventSessionUpdated && event.Session != nil && event.Session.BetaFields != nil && event.Session.BetaFields.TTSCloned != nil {
+			event.Session.BetaFields.TTSCloned.Audio = "Ignored for logging"
 		}
 		s := event.ToJson()
 		log.Printf("Received message: %s\n\n", s)
@@ -74,7 +76,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 			log.Printf("Received event: %s, exiting...\n", event.Type)
 			_ = realtimeClient.Disconnect()
 			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
-				_ = os.WriteFile(outputFilePath+".wav", bytes, 0644)
+				_, written = os.WriteFile(outputFilePath+".wav", bytes, 0644), true
 			}
 		}
 		return nil
@@ -95,7 +97,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 	defer inputFile.Close()
 
 	scanner := bufio.NewScanner(inputFile)
-	scanner.Buffer(make([]byte, 0, 1024*1024), int(bufio.MaxScanTokenSize))
+	scanner.Buffer(make([]byte, 0, 10*1024*1024), int(bufio.MaxScanTokenSize))
 	for scanner.Scan() {
 		line := scanner.Text()
 		if !strings.HasPrefix(line, "{") {
@@ -110,7 +112,9 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 			_ = realtimeClient.Disconnect()
 			break
 		}
-		if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
+		if event.Type == events.RealtimeClientEventSessionUpdate && event.Session != nil && event.Session.BetaFields != nil && event.Session.BetaFields.TTSCloned != nil {
+			event.Session.BetaFields.TTSCloned.Audio = "Ignored for logging"
+		} else if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
 			event.Audio = "Ignored for logging"
 		} else if event.Type == events.RealtimeClientInputVideoFrameAppend {
 			event.VideoFrame = nil
@@ -124,6 +128,12 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 	}
 
 	realtimeClient.Wait()
+
+	if !written {
+		if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
+			_, written = os.WriteFile(outputFilePath+".wav", bytes, 0644), true
+		}
+	}
 }
 
 func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {

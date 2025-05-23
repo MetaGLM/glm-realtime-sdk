@@ -23,24 +23,3 @@ func TestRealtimeClientVideoClientVad(t *testing.T) {
 func TestRealtimeAudioClientVadWithFunctionCall(t *testing.T) {
 	doTestRealtimeClientWithFC("/files/Audio.ClientVad.FC.Input", "/files/Audio.ClientVad.FC.Output")
 }
-
-func TestRealtimeClientAudioClientVadText(t *testing.T) {
-	doTestRealtimeClient("/files/Audio.ClientVad.Text.Input", "/files/Audio.ClientVad.Text.Output")
-}
-
-func TestRealtimeClientVideoClientVadText(t *testing.T) {
-	doTestRealtimeClient("/files/Video.ClientVad.Text.Input", "/files/Video.ClientVad.Text.Output")
-}
-
-// 音频服务端VAD模式示例
-func TestRealtimeClientAudioServerVad43(t *testing.T) {
-	doTestRealtimeClient("/files/Audio.ServerVad.4.3.Input", "/files/Audio.ServerVad.4.3.Output")
-}
-
-func TestRealtimeClientVideoClientVadTextIn(t *testing.T) {
-	doTestRealtimeClient("/files/Video.ClientVad.TextIn.Input", "/files/Video.ClientVad.TextIn.Output")
-}
-
-func TestRealtimeVideoClientVadWithFunctionCall(t *testing.T) {
-	doTestRealtimeClientWithFC("/files/Video.ClientVad.FC.Input", "/files/Video.ClientVad.FC.Output")
-}

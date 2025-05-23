@@ -9,6 +9,7 @@ type EventType string
 const (
 	// Client events
 	RealtimeClientEventSessionUpdate              EventType = "session.update"
+	RealtimeClientEventTranscriptionSessionUpdate EventType = "transcription_session.update"
 	RealtimeClientEventInputAudioBufferAppend     EventType = "input_audio_buffer.append"
 	RealtimeClientEventInputAudioBufferCommit     EventType = "input_audio_buffer.commit"
 	RealtimeClientEventInputAudioBufferClear      EventType = "input_audio_buffer.clear"
@@ -18,7 +19,6 @@ const (
 	RealtimeClientEventConversationItemDelete     EventType = "conversation.item.delete"
 	RealtimeClientEventResponseCreate             EventType = "response.create"
 	RealtimeClientEventResponseCancel             EventType = "response.cancel"
-	RealtimeClientEventTranscriptionSessionUpdate EventType = "transcription_session.update"
 
 	// Server events
 	RealtimeServerEventError                                            EventType = "error"
@@ -196,6 +196,12 @@ type BetaFields struct {
 	ChatMode      ChatMode       `json:"chat_mode,omitempty"`
 	FPS           int            `json:"fps,omitempty"`
 	TTSSource     string         `json:"tts_source,omitempty"`
+	TTSCloned     *ClonedInfo    `json:"tts_cloned,omitempty"`
 	SimpleBrowser *SimpleBrowser `json:"simple_browser,omitempty"`
 	AutoSearch    *bool          `json:"auto_search,omitempty"` // 是否自动搜索
+}
+
+type ClonedInfo struct {
+	Audio string `json:"audio,omitempty"`
+	Text  string `json:"text,omitempty"`
 }

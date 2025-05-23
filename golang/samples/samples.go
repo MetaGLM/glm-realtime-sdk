@@ -35,7 +35,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 
 	dir, err := os.Getwd()
 	if err != nil {
-	    log.Fatalf("Error getting pwd: %v\n", err)
+		log.Fatalf("Error getting pwd: %v\n", err)
 		return
 	}
 
@@ -48,7 +48,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 	}
 	defer file.Close()
 
-	wavBytes := make([][]byte, 0)
+	wavBytes, written := make([][]byte, 0), false
 	var realtimeClient client.RealtimeClient
 	onReceived := func(event *events.Event) error {
 		if event.Type == events.RealtimeServerEventResponseAudioDelta {
@@ -63,6 +63,8 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 				return err
 			}
 			wavBytes, event.Delta = append(wavBytes, bytes), "Ignored for logging"
+		} else if event.Type == events.RealtimeServerEventSessionUpdated && event.Session != nil && event.Session.BetaFields != nil && event.Session.BetaFields.TTSCloned != nil {
+			event.Session.BetaFields.TTSCloned.Audio = "Ignored for logging"
 		}
 		s := event.ToJson()
 		log.Printf("Received message: %s\n\n", s)
@@ -72,19 +74,19 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 		}
 		if event.Type == events.RealtimeServerEventResponseDone || event.Type == events.RealtimeServerEventError {
 			log.Printf("Received event: %s, exiting...\n", event.Type)
-			realtimeClient.Disconnect()
-			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0{
-			    os.WriteFile(outputFilePath + ".wav", bytes, 0644)
+			_ = realtimeClient.Disconnect()
+			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
+				_, written = os.WriteFile(outputFilePath+".wav", bytes, 0644), true
 			}
 		}
 		return nil
-    }
-    realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
+	}
+	realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
 
-    if err = realtimeClient.Connect(); err != nil {
-        log.Fatalf("Connect failed, error: %v\n", err)
-        return
-    }
+	if err = realtimeClient.Connect(); err != nil {
+		log.Fatalf("Connect failed, error: %v\n", err)
+		return
+	}
 	defer realtimeClient.Disconnect()
 
 	inputFile, err := os.Open(dir + inputFilePath)
@@ -95,7 +97,7 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 	defer inputFile.Close()
 
 	scanner := bufio.NewScanner(inputFile)
-	scanner.Buffer(make([]byte, 0, 1024*1024), int(bufio.MaxScanTokenSize))
+	scanner.Buffer(make([]byte, 0, 10*1024*1024), int(bufio.MaxScanTokenSize))
 	for scanner.Scan() {
 		line := scanner.Text()
 		if !strings.HasPrefix(line, "{") {
@@ -107,16 +109,18 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 			return
 		}
 		if err = realtimeClient.Send(event); err != nil {
-			realtimeClient.Disconnect()
+			_ = realtimeClient.Disconnect()
 			break
 		}
-		if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
+		if event.Type == events.RealtimeClientEventSessionUpdate && event.Session != nil && event.Session.BetaFields != nil && event.Session.BetaFields.TTSCloned != nil {
+			event.Session.BetaFields.TTSCloned.Audio = "Ignored for logging"
+		} else if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
 			event.Audio = "Ignored for logging"
 		} else if event.Type == events.RealtimeClientInputVideoFrameAppend {
 			event.VideoFrame = nil
 		}
 		log.Printf("Sent message: %s\n\n", event.ToJson())
-		time.Sleep(135*time.Millisecond)
+		time.Sleep(135 * time.Millisecond)
 	}
 
 	if err = scanner.Err(); err != nil {
@@ -124,13 +128,19 @@ func doTestRealtimeClient(inputFilePath, outputFilePath string) {
 	}
 
 	realtimeClient.Wait()
+
+	if !written {
+		if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
+			_, written = os.WriteFile(outputFilePath+".wav", bytes, 0644), true
+		}
+	}
 }
 
 func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 
 	dir, err := os.Getwd()
 	if err != nil {
-	    log.Fatalf("Error getting pwd: %v\n", err)
+		log.Fatalf("Error getting pwd: %v\n", err)
 		return
 	}
 
@@ -143,7 +153,7 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 	}
 	defer file.Close()
 
-	wavBytes := make([][]byte, 0)
+	wavBytes, callId := make([][]byte, 0), ""
 	var status atomic.Uint32
 	var realtimeClient client.RealtimeClient
 	onReceived := func(event *events.Event) error {
@@ -166,24 +176,27 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 			log.Fatalf("Error writing to file: %v\n", err)
 			return err
 		}
-		if event.Type == events.RealtimeServerEventResponseFunctionCallArgumentsDone || event.Type == events.RealtimeServerEventResponseDone  {
+		if event.Type == events.RealtimeServerEventResponseFunctionCallArgumentsDone {
+			callId = event.CallID
+		}
+		if event.Type == events.RealtimeServerEventResponseFunctionCallArgumentsDone || event.Type == events.RealtimeServerEventResponseDone {
 			status.Add(1)
 		}
 		if status.Load() > 2 && event.Type == events.RealtimeServerEventResponseDone || event.Type == events.RealtimeServerEventError {
 			log.Printf("Received event: %s, exiting...\n", event.Type)
-			realtimeClient.Disconnect()
-			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0{
-			    os.WriteFile(outputFilePath + ".wav", bytes, 0644)
+			_ = realtimeClient.Disconnect()
+			if bytes, err := tools.ConcatWavBytes(wavBytes); err == nil && len(bytes) > 0 {
+				_ = os.WriteFile(outputFilePath+".wav", bytes, 0644)
 			}
 		}
 		return nil
-    }
-    realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
+	}
+	realtimeClient = client.NewRealtimeClient(ZHIPU_REALTIME_URL, ZHIPU_API_KEY, onReceived)
 
-    if err = realtimeClient.Connect(); err != nil {
-        log.Fatalf("Connect failed, error: %v\n", err)
-        return
-    }
+	if err = realtimeClient.Connect(); err != nil {
+		log.Fatalf("Connect failed, error: %v\n", err)
+		return
+	}
 	defer realtimeClient.Disconnect()
 
 	inputFile, err := os.Open(dir + inputFilePath)
@@ -208,8 +221,11 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 		for event.Type == events.RealtimeClientEventConversationItemCreate && status.Load() < 2 {
 			time.Sleep(time.Second)
 		}
+		if event.Type == events.RealtimeClientEventConversationItemCreate && event.Item != nil {
+			event.Item.CallId = callId
+		}
 		if err = realtimeClient.Send(event); err != nil {
-			realtimeClient.Disconnect()
+			_ = realtimeClient.Disconnect()
 			break
 		}
 		if event.Type == events.RealtimeClientEventInputAudioBufferAppend {
@@ -218,7 +234,7 @@ func doTestRealtimeClientWithFC(inputFilePath, outputFilePath string) {
 			event.VideoFrame = nil
 		}
 		log.Printf("Sent message: %s\n\n", event.ToJson())
-		time.Sleep(135*time.Millisecond)
+		time.Sleep(135 * time.Millisecond)
 	}
 
 	if err = scanner.Err(); err != nil {

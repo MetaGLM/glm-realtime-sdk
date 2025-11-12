@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/MetaGLM/glm-realtime-sdk/golang/events"
+	"github.com/MetaGLM/glm-realtime-sdk/golang/tools"
 	"github.com/gorilla/websocket"
 )
 
@@ -111,6 +112,37 @@ func (r *realtimeClient) Send(event *events.Event) (err error) {
 		log.Printf("[RealtimeClient] Send failed, error: %v\n", err)
 	}
 	return err
+}
+
+func (r *realtimeClient) SendFrameByVideo(event *events.Event) (err error) {
+	if events.RealtimeClientVideoAppend != event.Type {
+		return fmt.Errorf("event type is not RealtimeClientVideoAppend")
+	}
+	if event.VideoFrame == nil {
+		return fmt.Errorf("event videoFrame is nil")
+	}
+
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	if !r.isConnected {
+		log.Printf("[RealtimeClient] Sending event fail, err: not connected\n")
+		return fmt.Errorf("not connected")
+	}
+	if event.ClientTimestamp <= 0 {
+		event.ClientTimestamp = time.Now().UnixMilli()
+	}
+	frames, err := tools.ExtractFramesToBase64(event.VideoFrame, "Z0LADJoFAAABMA==", "aM48gA==")
+	if err != nil {
+		return fmt.Errorf("extract frames failed: %v", err)
+	}
+	for index := range frames {
+		event.VideoFrame = frames[index]
+		if err = r.conn.WriteMessage(websocket.TextMessage, []byte(event.ToJson())); err != nil {
+			log.Printf("[RealtimeClient] Send failed, error: %v\n", err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *realtimeClient) readWsMsg() {

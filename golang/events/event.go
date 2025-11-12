@@ -11,6 +11,7 @@ const (
 	RealtimeClientEventSessionUpdate              EventType = "session.update"
 	RealtimeClientEventTranscriptionSessionUpdate EventType = "transcription_session.update"
 	RealtimeClientEventInputAudioBufferAppend     EventType = "input_audio_buffer.append"
+	RealtimeClientVideoAppend                     EventType = "input_audio_buffer.append_video_frame"
 	RealtimeClientEventInputAudioBufferCommit     EventType = "input_audio_buffer.commit"
 	RealtimeClientEventInputAudioBufferClear      EventType = "input_audio_buffer.clear"
 	RealtimeClientEventConversationItemCreate     EventType = "conversation.item.create"
